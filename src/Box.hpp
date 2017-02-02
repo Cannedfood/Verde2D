@@ -1,5 +1,9 @@
 #pragma once
 
+#include <glm/glm.hpp>
+#include <glm/gtx/component_wise.hpp>
+
+/// An axis-aligned bounding box
 struct Box {
 	glm::vec2 min, max;
 
@@ -19,7 +23,7 @@ struct Box {
 			min.y <= p.y;
 	}
 
-	// Can go in the wrong direction if the boxes don't actually touch
+	/// Can go in the wrong direction if the boxes don't actually touch
 	void shortestSeparation(const Box& other, glm::vec2* store_in) {
 		glm::vec2 p = max - other.min;
 		glm::vec2 n = min - other.max;
@@ -35,8 +39,10 @@ struct Box {
 			store_in->x = 0;
 	}
 
+	/// Creates a copy of the box, offset by v
 	Box offset(const glm::vec2& v) const { return Box { min + v, max + v }; }
 
+	/// Returns a box representing the overlap between this and the other box
 	Box overlap(const Box& other) const {
 		return Box {
 			glm::min(min, other.min),
@@ -44,11 +50,14 @@ struct Box {
 		};
 	}
 
+	/// Returns the width/height of this box
 	glm::vec2 size() const { return max - min; }
+	/// Returns the 2d volume of this box
 	float     volume() const { return glm::compMul(size()); }
-
+	/// Returns the middle point of this box
 	glm::vec2 middle() const { return (max + min) * 0.5f; }
 
+	/// Makes sure that min contains the minimum and max the maximum values
 	void fix() {
 		glm::vec2 new_min = glm::min(min, max);
 		max = glm::max(min, max);

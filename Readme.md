@@ -30,3 +30,4 @@ Editing:
 	- `3`: dirt
 - `X`: delete currently selected box
 - `K`: toggle snapping (whether boxes should be aligned to a 0.5 distance grid)
+- drag and drop an image to make it the texture of the current box

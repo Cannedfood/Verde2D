@@ -15,7 +15,12 @@ Texture::~Texture() {
 	free();
 }
 
+using namespace std::chrono;
+using namespace std::literals::chrono_literals;
+
 bool Texture::load(const std::string& s) {
+	auto beg = duration_cast<microseconds>(steady_clock::now().time_since_epoch());
+
 	int x, y, comp;
 	unsigned char* data = stbi_load(s.c_str(), &x, &y, &comp, 0);
 	if(!data) {
@@ -50,6 +55,11 @@ bool Texture::load(const std::string& s) {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
 	stbi_image_free(data);
+
+	mFile = s;
+	mLoadTime = duration_cast<microseconds>(steady_clock::now().time_since_epoch()) - beg;
+
+	printf("Loaded %s (%.2fms)\n", s.c_str(), mLoadTime.count() * 0.001f);
 	return true;
 }
 
@@ -57,6 +67,7 @@ void Texture::free() {
 	if(mHandle) {
 		glDeleteTextures(1, &mHandle);
 		mHandle = 0;
+		printf("Deleted %s\n", mFile.c_str());
 	}
 }
 
@@ -68,12 +79,16 @@ void Texture::bind() {
 
 std::unordered_map<std::string, std::shared_ptr<Texture>>* pTextureCache;
 
-void Texture::Init() {
+void Texture::InitCache() {
 	pTextureCache = new std::unordered_map<std::string, std::shared_ptr<Texture>>;
 }
 
-void Texture::Quit() {
+void Texture::FreeCache() {
 	delete pTextureCache;
+}
+
+void Texture::CleanCache() {
+	// TODO: remove unique shared_ptr from cache
 }
 
 std::shared_ptr<Texture> Texture::Load(const std::string &s) {

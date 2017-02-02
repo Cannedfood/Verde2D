@@ -99,29 +99,41 @@ void Level::removeObject(Object *o) {
 	printf("Removed object %p\n", o);
 }
 
-void Level::debugDraw() {
+void Level::debugDraw(const Box& b) {
 	glColor4f(1, 1, 1, 1);
-	for(auto* p : mStaticObjects)
-		drawBBox(p->mBounds);
+	for(auto* p : mStaticObjects) {
+		if(p->mBounds.touches(b))
+			drawBBox(p->mBounds);
+	}
 
 	glColor4f(0, 0, 1, 1);
-	for(auto* p : mParticleObjects)
-		drawBBox(p->mBounds);
+	for(auto* p : mParticleObjects) {
+		if(p->mBounds.touches(b))
+			drawBBox(p->mBounds);
+	}
 
 	glColor4f(1, 0, 0, 1);
-	for(auto* p : mDynamicObjects)
-		drawBBox(p->mBounds);
+	for(auto* p : mDynamicObjects) {
+		if(p->mBounds.touches(b))
+			drawBBox(p->mBounds);
+	}
 }
 
-void Level::draw() {
-	for(auto* p : mStaticObjects)
-		drawObject(p);
+void Level::draw(const Box& b) {
+	for(auto* p : mStaticObjects) {
+		if(p->mBounds.touches(b))
+			drawObject(p);
+	}
 
-	for(auto* p : mParticleObjects)
-		drawObject(p);
+	for(auto* p : mParticleObjects) {
+		if(p->mBounds.touches(b))
+			drawObject(p);
+	}
 
-	for(auto* p : mDynamicObjects)
-		drawObject(p);
+	for(auto* p : mDynamicObjects) {
+		if(p->mBounds.touches(b))
+			drawObject(p);
+	}
 }
 
 static void resolveOneWay(std::vector<Object*>& av, std::vector<Object*>& bv, float dt) {

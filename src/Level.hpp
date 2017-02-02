@@ -32,7 +32,9 @@ public:
 	void addObject(Object* o, Object::Type type);
 	void removeObject(Object* o);
 
-	void debugDraw();
-	void draw();
+	/// Draws the outlines of all boxes, the color depends on the kind of box
+	void debugDraw(const Box& b);
+	/// Draws all boxes touching b
+	void draw(const Box& b);
 	void update(float dt);
 };

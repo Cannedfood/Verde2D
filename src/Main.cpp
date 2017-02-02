@@ -18,6 +18,7 @@ void viewportChangedCallback(GLFWwindow* win, int w, int h);
 void cursorCallback(GLFWwindow* win, double x, double y);
 void clickCallback(GLFWwindow* win, int btn, int action, int mods);
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
+void dropCallback(GLFWwindow* w, int count, const char** data);
 
 class Game {
 public:
@@ -45,14 +46,18 @@ public:
 		Object* selected = nullptr;
 	} mEditor;
 
-	glm::vec2 MouseInLevel() {
+	glm::vec2 ViewportToLevel(const glm::vec2& v) {
 		float yscale = 2 * mCamZoom;
 		float xscale = yscale * mAspect;
 
 		return {
-			mCamPosition.x + mMouse.x / xscale,
-			mCamPosition.y + mMouse.y / yscale
+			mCamPosition.x + v.x / xscale,
+			mCamPosition.y + v.y / yscale
 		};
+	}
+
+	glm::vec2 MouseInLevel() {
+		return ViewportToLevel(mMouse);
 	}
 
 	Object* Active() {
@@ -90,11 +95,12 @@ public:
 		glfwSetCursorPosCallback(mWindow, cursorCallback);
 		glfwSetMouseButtonCallback(mWindow, clickCallback);
 		glfwSetKeyCallback(mWindow, keyCallback);
+		glfwSetDropCallback(mWindow, dropCallback);
 		glfwSwapInterval(1);
 
 		viewportChangedCallback(mWindow, 800, 600);
 
-		Texture::Init();
+		Texture::InitCache();
 
 
 		// Test objects
@@ -111,10 +117,13 @@ public:
 			{ 0,  0 },
 			{ 10, 1 }
 		});
+
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	}
 
 	void Quit() {
-		Texture::Quit();
+		Texture::FreeCache();
 		glfwDestroyWindow(mWindow);
 		glfwTerminate();
 	}
@@ -183,13 +192,18 @@ public:
 			glLineWidth(4);
 			mLevel.update(dt);
 
+			Box viewArea {
+				ViewportToLevel(glm::vec2{-1.f}),
+				ViewportToLevel(glm::vec2{ 1.f})
+			};
+
 			glLineWidth(1);
-			mLevel.draw();
+			mLevel.draw(viewArea);
 
 			if(mEditor.active) {
 				glLineWidth(3);
 				glDisable(GL_TEXTURE_2D);
-				mLevel.debugDraw();
+				mLevel.debugDraw(viewArea);
 
 				if(mEditor.selected) {
 					glColor3f(1, 1, 0);
@@ -223,7 +237,7 @@ void viewportChangedCallback(GLFWwindow* win, int w, int h) {
 }
 
 void onCursorUpdate() {
-	if(glfwGetMouseButton(game->mWindow, GLFW_MOUSE_BUTTON_LEFT)) {
+	if(glfwGetMouseButton(game->mWindow, GLFW_MOUSE_BUTTON_LEFT) || glfwGetMouseButton(game->mWindow, GLFW_MOUSE_BUTTON_MIDDLE)) {
 		if(!game->mGround.empty()) {
 			glm::vec2 mouse = game->MouseInLevel();
 			Box&      b     = game->Active()->mRelativeBounds;
@@ -238,13 +252,7 @@ void onCursorUpdate() {
 			if(mdist.y < 0) b.min.y = mouse.y;
 			else            b.max.y = mouse.y;
 
-			printf("Set %u %s.x = %.2f %s.y = %.2f\n",
-				(unsigned) game->mGround.size(),
-				mdist.x < 0 ? "min" : "max",
-				mouse.x,
-				mdist.y < 0 ? "min" : "max",
-				mouse.y
-			);
+			b.fix();
 		}
 	}
 }
@@ -289,6 +297,11 @@ void clickCallback(GLFWwindow* win, int btn, int action, int mods) {
 		} break;
 		default: break;
 	}
+}
+
+void dropCallback(GLFWwindow* w, int count, const char** data) {
+	if(count > 0)
+		game->Active()->setTexture(data[count - 1]);
 }
 
 void setTexture(int i) {

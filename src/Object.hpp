@@ -1,10 +1,9 @@
 #pragma once
 
-#include <glm/glm.hpp>
-#include <glm/gtx/component_wise.hpp>
-#include <memory>
-
 #include "Box.hpp"
+
+#include <glm/glm.hpp>
+#include <memory>
 
 class Texture;
 class Level;

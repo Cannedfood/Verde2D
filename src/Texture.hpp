@@ -3,12 +3,17 @@
 #include <glm/vec2.hpp>
 #include <string>
 #include <memory>
+#include <chrono>
 
 class Texture {
-	unsigned  mHandle;
+	unsigned    mHandle;
 
-	bool      mDoesWrap;
-	glm::vec2 mWorldSize;
+	bool        mDoesWrap;
+	glm::vec2   mWorldSize;
+
+
+	std::string mFile;
+	std::chrono::microseconds mLoadTime;
 
 public:
 	const glm::vec2& getWrapping() { return mWorldSize; }
@@ -26,6 +31,7 @@ public:
 
 	static std::shared_ptr<Texture> Load(const std::string& s);
 
-	static void Init();
-	static void Quit();
+	static void InitCache();
+	static void FreeCache();
+	static void CleanCache();
 };
