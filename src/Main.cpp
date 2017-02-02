@@ -7,7 +7,7 @@
 #include <chrono>
 
 #include "Level.hpp"
-#include "PhysicsObject.hpp"
+#include "Object.hpp"
 #include "Texture.hpp"
 
 using namespace std;
@@ -31,10 +31,10 @@ public:
 	glm::vec2   mCamPosition;
 	float       mCamZoom = 0.1f;
 
-	PhysicsObject mPlayer;
+	Object mPlayer;
 	glm::vec2 mPlayerSpeed = { 6.f, 6.f };
 
-	std::vector<std::unique_ptr<PhysicsObject>> mGround;
+	std::vector<std::unique_ptr<Object>> mGround;
 
 	Level       mLevel;
 
@@ -42,7 +42,7 @@ public:
 		bool  active    = false;
 		bool  snap      = true;
 		float snap_dist = 2.f;
-		PhysicsObject* selected = nullptr;
+		Object* selected = nullptr;
 	} mEditor;
 
 	glm::vec2 MouseInLevel() {
@@ -55,7 +55,7 @@ public:
 		};
 	}
 
-	PhysicsObject* Active() {
+	Object* Active() {
 		if(mEditor.selected)
 			return mEditor.selected;
 		else if(mGround.empty())
@@ -65,10 +65,10 @@ public:
 	}
 
 	void AddGround(const Box& bounds) {
-		mGround.emplace_back(new PhysicsObject);
+		mGround.emplace_back(new Object);
 		mGround.back()->mRelativeBounds = bounds;
 		mGround.back()->mPosition = glm::vec2{0};
-		mLevel.addObject(mGround.back().get(), PhysicsObject::STATIC);
+		mLevel.addObject(mGround.back().get(), Object::STATIC);
 		mGround.back()->setTexture(
 			"res/rock.png"
 		);
@@ -103,7 +103,7 @@ public:
 			glm::vec2 {  0.5f }
 		};
 		mPlayer.mPosition = { 1, 4 };
-		mLevel.addObject(&mPlayer, PhysicsObject::DYNAMIC);
+		mLevel.addObject(&mPlayer, Object::DYNAMIC);
 
 		mPlayer.setTexture("/home/benno/Downloads/danks.jpg");
 
@@ -333,7 +333,7 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 			case GLFW_KEY_1: setTexture(1); break;
 			case GLFW_KEY_2: setTexture(2); break;
 			case GLFW_KEY_3: setTexture(3); break;
-			case GLFW_KEY_4: setTexture(4); break;
+			// case GLFW_KEY_4: setTexture(4); break;
 			case GLFW_KEY_K:
 				game->mEditor.snap = !game->mEditor.snap;
 				break;

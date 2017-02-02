@@ -1,6 +1,6 @@
 #include "Level.hpp"
 
-#include "PhysicsObject.hpp"
+#include "Object.hpp"
 #include "Texture.hpp"
 
 #include <GL/gl.h>
@@ -17,7 +17,7 @@ static void drawBBox(const Box& b) {
 	glEnd();
 }
 
-static void drawObject(PhysicsObject* o) {
+static void drawObject(Object* o) {
 	if(o->mTexture) {
 		glEnable(GL_TEXTURE_2D);
 		glColor3f(1, 1, 1);
@@ -64,12 +64,12 @@ Level::~Level() {
 	for(auto* o : mParticleObjects) o->mLevel = nullptr;
 }
 
-void Level::addObject(PhysicsObject* o, PhysicsObject::Type type) {
+void Level::addObject(Object* o, Object::Type type) {
 	switch(type) {
 		default: addObject(o, o->mType);       break;
-		case PhysicsObject::DYNAMIC:  mDynamicObjects.push_back(o);  o->mType = PhysicsObject::DYNAMIC; break;
-		case PhysicsObject::STATIC:   mStaticObjects.push_back(o);   o->mType = PhysicsObject::STATIC; break;
-		case PhysicsObject::PARTICLE: mParticleObjects.push_back(o); o->mType = PhysicsObject::PARTICLE; break;
+		case Object::DYNAMIC:  mDynamicObjects.push_back(o);  o->mType = Object::DYNAMIC; break;
+		case Object::STATIC:   mStaticObjects.push_back(o);   o->mType = Object::STATIC; break;
+		case Object::PARTICLE: mParticleObjects.push_back(o); o->mType = Object::PARTICLE; break;
 	}
 
 	o->mLevel = this;
@@ -77,19 +77,19 @@ void Level::addObject(PhysicsObject* o, PhysicsObject::Type type) {
 	printf("Added object %p\n", o);
 }
 
-void Level::removeObject(PhysicsObject *o) {
+void Level::removeObject(Object *o) {
 	if(o->mLevel != this) return;
 
 	switch (o->mType) {
-		case PhysicsObject::DYNAMIC:
+		case Object::DYNAMIC:
 			mDynamicObjects.erase(std::find(mDynamicObjects.begin(), mDynamicObjects.end(), o));
 		break;
 
-		case PhysicsObject::STATIC:
+		case Object::STATIC:
 			mStaticObjects.erase(std::find(mStaticObjects.begin(), mStaticObjects.end(), o));
 		break;
 
-		case PhysicsObject::PARTICLE:
+		case Object::PARTICLE:
 			mParticleObjects.erase(std::find(mParticleObjects.begin(), mParticleObjects.end(), o));
 		break;
 	}
@@ -124,7 +124,7 @@ void Level::draw() {
 		drawObject(p);
 }
 
-static void resolveOneWay(std::vector<PhysicsObject*>& av, std::vector<PhysicsObject*>& bv, float dt) {
+static void resolveOneWay(std::vector<Object*>& av, std::vector<Object*>& bv, float dt) {
 	for(auto* a : av) {
 		for(auto* b : bv) {
 			if(a->mBounds.touches(b->mBounds)) {
@@ -142,7 +142,7 @@ static void resolveOneWay(std::vector<PhysicsObject*>& av, std::vector<PhysicsOb
 	}
 }
 
-static void resolveTwoWay(std::vector<PhysicsObject*>& a, std::vector<PhysicsObject*>& b) {
+static void resolveTwoWay(std::vector<Object*>& a, std::vector<Object*>& b) {
 
 }
 

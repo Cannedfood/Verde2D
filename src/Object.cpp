@@ -1,19 +1,19 @@
-#include "PhysicsObject.hpp"
+#include "Object.hpp"
 
 #include "Level.hpp"
 
 #include "Texture.hpp"
 
-PhysicsObject::PhysicsObject() :
+Object::Object() :
 	mLevel(nullptr),
 	mType(DYNAMIC)
 {}
 
-PhysicsObject::~PhysicsObject() {
+Object::~Object() {
 	if(mLevel)
 		mLevel->removeObject(this);
 }
 
-void PhysicsObject::setTexture(const std::string &file) {
+void Object::setTexture(const std::string &file) {
 	mTexture = Texture::Load(file);
 }

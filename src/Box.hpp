@@ -1,9 +1,5 @@
 #pragma once
 
-#include <glm/glm.hpp>
-#include <glm/gtx/component_wise.hpp>
-#include <memory>
-
 struct Box {
 	glm::vec2 min, max;
 
@@ -58,32 +54,4 @@ struct Box {
 		max = glm::max(min, max);
 		min = new_min;
 	}
-};
-
-class Texture;
-class Level;
-
-class PhysicsObject {
-public:
-	enum Type {
-		STATIC,  //!< Only active interaction
-		DYNAMIC, //!< Passive & active interaction
-		PARTICLE //!< Only passive interaction
-	};
-
-	Level*    mLevel;
-	Type      mType;
-
-	glm::vec2 mMotion;
-	glm::vec2 mPosition;
-
-	Box       mRelativeBounds;
-	Box       mBounds;
-
-	std::shared_ptr<Texture> mTexture;
-
-	PhysicsObject();
-	~PhysicsObject();
-
-	void setTexture(const std::string& file);
 };

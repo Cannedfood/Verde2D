@@ -4,22 +4,22 @@
 #include <glm/vec2.hpp>
 #include <cstdint>
 
-#include "PhysicsObject.hpp"
+#include "Object.hpp"
 
 struct Manifold {
-	PhysicsObject* a;
-	PhysicsObject* b;
+	Object* a;
+	Object* b;
 	glm::vec2      normal;
 	float          penetration;
 };
 
 class Level {
 	std::uint32_t               mHighestId;
-	std::vector<PhysicsObject*> mStaticObjects;
+	std::vector<Object*> mStaticObjects;
 	std::vector<Box*>           mWaterAreas;
 
-	std::vector<PhysicsObject*> mDynamicObjects;
-	std::vector<PhysicsObject*> mParticleObjects;
+	std::vector<Object*> mDynamicObjects;
+	std::vector<Object*> mParticleObjects;
 
 	std::vector<Manifold> mManifolds;
 
@@ -29,8 +29,8 @@ public:
 
 	const std::vector<Manifold>& getManifolds() { return mManifolds; }
 
-	void addObject(PhysicsObject* o, PhysicsObject::Type type);
-	void removeObject(PhysicsObject* o);
+	void addObject(Object* o, Object::Type type);
+	void removeObject(Object* o);
 
 	void debugDraw();
 	void draw();

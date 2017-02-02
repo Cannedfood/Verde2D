@@ -24,5 +24,9 @@ Editing:
 - `middle click`: create new box
 - `right click`: select a box
 - `left click`: edit the boxes size
-- `1` - `4`: change texture of currently selected box
+- `1` - `3`: change texture of currently selected box
+	- `1`: rocks (default)
+	- `2`: dark rocks
+	- `3`: dirt
 - `X`: delete currently selected box
+- `K`: toggle snapping (whether boxes should be aligned to a 0.5 distance grid)
