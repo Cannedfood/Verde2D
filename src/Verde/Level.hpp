@@ -14,9 +14,9 @@ struct Manifold {
 };
 
 class Level {
-	std::uint32_t               mHighestId;
+	std::uint32_t        mHighestId;
 	std::vector<Object*> mStaticObjects;
-	std::vector<Box*>           mWaterAreas;
+	std::vector<Box*>    mWaterAreas;
 
 	std::vector<Object*> mDynamicObjects;
 	std::vector<Object*> mParticleObjects;
@@ -30,6 +30,7 @@ public:
 	const std::vector<Manifold>& getManifolds() { return mManifolds; }
 
 	void addObject(Object* o, Object::Type type);
+	void addOwned(std::unique_ptr<Object>&& o, Object::Type type);
 	void removeObject(Object* o);
 
 	/// Draws the outlines of all boxes, the color depends on the kind of box
@@ -37,4 +38,7 @@ public:
 	/// Draws all boxes touching b
 	void draw(const Box& b);
 	void update(float dt);
+
+	Object* at(const glm::vec2& p, int types);
+	bool    at(const glm::vec2& p, std::vector<Object*>& to, size_t n, int types);
 };

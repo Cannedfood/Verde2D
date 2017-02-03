@@ -8,5 +8,12 @@ workspace "Verde"
 
 project "verde"
 	kind "WindowedApp"
-	files "src/**"
-	links { "glfw", "GL" }
+	files "src/Verde/**"
+	links { "glfw", "GL", "yaml-cpp" }
+
+project "yaml-cpp"
+	kind "StaticLib"
+	files "src/yaml-cpp/src/**"
+
+	project "*"
+		includedirs "src/yaml-cpp/include"

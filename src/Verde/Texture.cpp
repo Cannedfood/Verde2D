@@ -77,7 +77,7 @@ void Texture::bind() {
 
 #include <unordered_map>
 
-std::unordered_map<std::string, std::shared_ptr<Texture>>* pTextureCache;
+std::unordered_map<std::string, std::shared_ptr<Texture>>* pTextureCache = nullptr;
 
 void Texture::InitCache() {
 	pTextureCache = new std::unordered_map<std::string, std::shared_ptr<Texture>>;

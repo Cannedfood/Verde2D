@@ -10,10 +10,18 @@ Object::Object() :
 {}
 
 Object::~Object() {
-	if(mLevel)
+	if(mLevel) {
+		mFlags &= ~F_OWNED_BY_LEVEL;
 		mLevel->removeObject(this);
+	}
 }
 
 void Object::setTexture(const std::string &file) {
 	mTexture = Texture::Load(file);
+}
+
+void Object::_onRemove() {
+	mLevel = nullptr;
+	if(mFlags & F_OWNED_BY_LEVEL)
+		delete this;
 }

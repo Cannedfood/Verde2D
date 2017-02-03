@@ -59,9 +59,9 @@ static void drawObject(Object* o) {
 }
 
 Level::~Level() {
-	for(auto* o : mDynamicObjects)  o->mLevel = nullptr;
-	for(auto* o : mStaticObjects)   o->mLevel = nullptr;
-	for(auto* o : mParticleObjects) o->mLevel = nullptr;
+	for(auto* o : mDynamicObjects)  o->_onRemove();
+	for(auto* o : mStaticObjects)   o->_onRemove();
+	for(auto* o : mParticleObjects) o->_onRemove();
 }
 
 void Level::addObject(Object* o, Object::Type type) {
@@ -75,6 +75,11 @@ void Level::addObject(Object* o, Object::Type type) {
 	o->mLevel = this;
 
 	printf("Added object %p\n", o);
+}
+
+void Level::addOwned(std::unique_ptr<Object>&& o, Object::Type type) {
+	o->mFlags |= Object::F_OWNED_BY_LEVEL;
+	addObject(o.release(), type);
 }
 
 void Level::removeObject(Object *o) {
@@ -94,7 +99,7 @@ void Level::removeObject(Object *o) {
 		break;
 	}
 
-	o->mLevel = nullptr;
+	o->_onRemove();
 
 	printf("Removed object %p\n", o);
 }
@@ -179,4 +184,59 @@ void Level::update(float dt) {
 	resolveOneWay(mDynamicObjects,  mStaticObjects, dt);
 	resolveOneWay(mParticleObjects, mStaticObjects, dt);
 	resolveOneWay(mParticleObjects, mDynamicObjects, dt);
+}
+
+Object* Level::at(const glm::vec2& p, int types) {
+	if(types & Object::STATIC) {
+		for(Object* o : mStaticObjects) {
+			if(o->mBounds.contains(p))
+				return o;
+		}
+	}
+	if(types & Object::DYNAMIC) {
+		for(Object* o : mDynamicObjects) {
+			if(o->mBounds.contains(p))
+				return o;
+		}
+	}
+	if(types & Object::PARTICLE) {
+		for(Object* o : mParticleObjects) {
+			if(o->mBounds.contains(p))
+				return o;
+		}
+	}
+
+	return nullptr;
+}
+
+bool Level::at(const glm::vec2& p, std::vector<Object*>& to, size_t n, int types) {
+	size_t left = n;
+
+	if(types & Object::STATIC) {
+		for(Object* o : mStaticObjects) {
+			if(o->mBounds.contains(p)) {
+				to.emplace_back(o);
+				if(--left == 0) goto L_FINISHED;
+			}
+		}
+	}
+	if(types & Object::DYNAMIC) {
+		for(Object* o : mDynamicObjects) {
+			if(o->mBounds.contains(p)) {
+				to.emplace_back(o);
+				if(--left == 0) goto L_FINISHED;
+			}
+		}
+	}
+	if(types & Object::PARTICLE) {
+		for(Object* o : mParticleObjects) {
+			if(o->mBounds.contains(p)) {
+				to.emplace_back(o);
+				if(--left == 0) goto L_FINISHED;
+			}
+		}
+	}
+
+L_FINISHED:
+	return n - left;
 }

@@ -11,9 +11,8 @@ class Texture {
 	bool        mDoesWrap;
 	glm::vec2   mWorldSize;
 
-
-	std::string mFile;
 	std::chrono::microseconds mLoadTime;
+	std::string               mFile;
 
 public:
 	const glm::vec2& getWrapping() { return mWorldSize; }

@@ -35,7 +35,7 @@ public:
 	Object mPlayer;
 	glm::vec2 mPlayerSpeed = { 6.f, 6.f };
 
-	std::vector<std::unique_ptr<Object>> mGround;
+	std::vector<std::unique_ptr<Object>> mObjects;
 
 	Level       mLevel;
 
@@ -63,22 +63,22 @@ public:
 	Object* Active() {
 		if(mEditor.selected)
 			return mEditor.selected;
-		else if(mGround.empty())
+		else if(mObjects.empty())
 			return nullptr;
 		else
-			return mEditor.selected = mGround.back().get();
+			return mEditor.selected = mObjects.back().get();
 	}
 
 	void AddGround(const Box& bounds) {
-		mGround.emplace_back(new Object);
-		mGround.back()->mRelativeBounds = bounds;
-		mGround.back()->mPosition = glm::vec2{0};
-		mLevel.addObject(mGround.back().get(), Object::STATIC);
-		mGround.back()->setTexture(
+		mObjects.emplace_back(new Object);
+		mObjects.back()->mRelativeBounds = bounds;
+		mObjects.back()->mPosition = glm::vec2{0};
+		mLevel.addObject(mObjects.back().get(), Object::STATIC);
+		mObjects.back()->setTexture(
 			"res/rock.png"
 		);
-		mGround.back()->mTexture->setWrapping(glm::vec2{1.f});
-		mEditor.selected = mGround.back().get();
+		mObjects.back()->mTexture->setWrapping(glm::vec2{1.f});
+		mEditor.selected = mObjects.back().get();
 	}
 
 	void Init() {
@@ -238,7 +238,7 @@ void viewportChangedCallback(GLFWwindow* win, int w, int h) {
 
 void onCursorUpdate() {
 	if(glfwGetMouseButton(game->mWindow, GLFW_MOUSE_BUTTON_LEFT) || glfwGetMouseButton(game->mWindow, GLFW_MOUSE_BUTTON_MIDDLE)) {
-		if(!game->mGround.empty()) {
+		if(!game->mObjects.empty()) {
 			glm::vec2 mouse = game->MouseInLevel();
 			Box&      b     = game->Active()->mRelativeBounds;
 
@@ -266,16 +266,7 @@ void clickCallback(GLFWwindow* win, int btn, int action, int mods) {
 	if(action < 1) return;
 	switch (btn) {
 		case GLFW_MOUSE_BUTTON_RIGHT: {
-			game->mEditor.selected = nullptr;
-			if(!game->mGround.empty()) {
-				glm::vec2 mouse = game->MouseInLevel();
-				for (int i = game->mGround.size() - 1; i >= 0; i--) {
-					if(game->mGround[i]->mBounds.contains(mouse)) {
-						game->mEditor.selected = game->mGround[i].get();
-						break;
-					}
-				}
-			}
+			game->mEditor.selected = game->mLevel.at(game->MouseInLevel(), Object::STATIC | Object::DYNAMIC);
 		} break;
 		case GLFW_MOUSE_BUTTON_MIDDLE: {
 			glm::vec2 p = game->MouseInLevel();
@@ -305,7 +296,7 @@ void dropCallback(GLFWwindow* w, int count, const char** data) {
 }
 
 void setTexture(int i) {
-	if(!game->mGround.empty()) {
+	if(!game->mObjects.empty()) {
 		i -= 1;
 
 		struct TexInfo {
@@ -331,9 +322,9 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 		switch (key) {
 			case GLFW_KEY_X:
 				if(game->mEditor.selected) {
-					for (size_t i = 0; i < game->mGround.size(); i++) {
-						if(game->mGround[i].get() == game->mEditor.selected) {
-							game->mGround.erase(game->mGround.begin() + i);
+					for (size_t i = 0; i < game->mObjects.size(); i++) {
+						if(game->mObjects[i].get() == game->mEditor.selected) {
+							game->mObjects.erase(game->mObjects.begin() + i);
 							break;
 						}
 					}
@@ -350,6 +341,12 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 			case GLFW_KEY_K:
 				game->mEditor.snap = !game->mEditor.snap;
 				break;
+			case GLFW_KEY_S: {
+				if(mods & GLFW_MOD_CONTROL) {
+					// TODO: select file
+					std::string save_path = "res/level.xml";
+				}
+			} break;
 		}
 
 	}
