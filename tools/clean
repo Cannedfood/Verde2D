@@ -1,0 +1,4 @@
+#!/bin/bash
+
+rm -r obj bin doxy
+rm Makefile *.make

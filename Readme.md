@@ -6,7 +6,12 @@ The build system currently only works on linux
 
 ## Compile
 
-`premake5 gmake && make`
+- `premake5 gmake && make`
+
+or short
+
+- `./tools/gen`
+- or `./tools/genclang` if you like clang more
 
 Required libraries:
 - OpenGL
