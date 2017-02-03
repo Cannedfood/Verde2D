@@ -1,5 +1,7 @@
 #pragma once
 
+#include <yaml-cpp/yaml.h>
+
 #include <glm/vec2.hpp>
 #include <string>
 #include <memory>
@@ -28,7 +30,10 @@ public:
 	void free();
 	void bind();
 
+	void write(YAML::Emitter& e);
+
 	static std::shared_ptr<Texture> Load(const std::string& s);
+	static std::shared_ptr<Texture> Load(YAML::Node n);
 
 	static void InitCache();
 	static void FreeCache();

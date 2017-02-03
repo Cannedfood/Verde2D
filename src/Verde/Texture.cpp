@@ -109,3 +109,29 @@ std::shared_ptr<Texture> Texture::Load(const std::string &s) {
 			return nullptr;
 	}
 }
+
+std::shared_ptr<Texture> Texture::Load(YAML::Node n) {
+	if(!n) return nullptr;
+
+	auto p = Load(n["path"].as<std::string>());
+
+	if(YAML::Node nn = n["wrapping"]) {
+		p->setWrapping({
+			nn[0].as<float>(),
+			nn[1].as<float>()
+		});
+	}
+
+	return p;
+}
+
+void Texture::write(YAML::Emitter& e) {
+	e << YAML::BeginMap;
+	e << YAML::Key << "path" << YAML::Value << mFile;
+	if(mDoesWrap) {
+		e << YAML::Key << "wrapping" << YAML::BeginSeq;
+			e << mWorldSize.x << mWorldSize.y;
+		e << YAML::EndSeq;
+	}
+	e << YAML::EndMap;
+}

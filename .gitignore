@@ -1,5 +1,8 @@
 bin
 obj
+doxy
 
 Makefile
 *.make
+
+res/level.yml

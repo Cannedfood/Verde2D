@@ -30,4 +30,8 @@ Editing:
 	- `3`: dirt
 - `X`: delete currently selected box
 - `K`: toggle snapping (whether boxes should be aligned to a 0.5 distance grid)
-- drag and drop an image to make it the texture of the current box
+- Drag and drop an image to make it the texture of the current box
+- `ctrl-S`: Save current level
+- `ctrl-O`: Load last save state
+- `arrow-up`: Move higher
+- `arrow-down`: Move lower

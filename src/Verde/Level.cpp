@@ -64,12 +64,12 @@ Level::~Level() {
 	for(auto* o : mParticleObjects) o->_onRemove();
 }
 
-void Level::addObject(Object* o, Object::Type type) {
+void Level::addObject(Object* o, int type) {
 	switch(type) {
-		default: addObject(o, o->mType);       break;
 		case Object::DYNAMIC:  mDynamicObjects.push_back(o);  o->mType = Object::DYNAMIC; break;
 		case Object::STATIC:   mStaticObjects.push_back(o);   o->mType = Object::STATIC; break;
 		case Object::PARTICLE: mParticleObjects.push_back(o); o->mType = Object::PARTICLE; break;
+		default: addObject(o, o->mType);       break;
 	}
 
 	o->mLevel = this;
@@ -77,7 +77,7 @@ void Level::addObject(Object* o, Object::Type type) {
 	printf("Added object %p\n", o);
 }
 
-void Level::addOwned(std::unique_ptr<Object>&& o, Object::Type type) {
+void Level::addOwned(std::unique_ptr<Object>&& o, int type) {
 	o->mFlags |= Object::F_OWNED_BY_LEVEL;
 	addObject(o.release(), type);
 }
@@ -164,6 +164,14 @@ static void resolveTwoWay(std::vector<Object*>& a, std::vector<Object*>& b) {
 }
 
 void Level::update(float dt) {
+	auto comp = [](auto* a, auto* b) {
+		return a->mHeight < b->mHeight;
+	};
+
+	std::stable_sort(mStaticObjects.begin(), mStaticObjects.end(), comp);
+	std::stable_sort(mDynamicObjects.begin(), mDynamicObjects.end(), comp);
+	std::stable_sort(mParticleObjects.begin(), mParticleObjects.end(), comp);
+
 	for(auto* o : mStaticObjects)
 		o->mBounds = o->mRelativeBounds.offset(o->mPosition);
 

@@ -5,6 +5,7 @@
 #include <list>
 #include <thread>
 #include <chrono>
+#include <fstream>
 
 #include "Level.hpp"
 #include "Object.hpp"
@@ -32,8 +33,8 @@ public:
 	glm::vec2   mCamPosition;
 	float       mCamZoom = 0.1f;
 
-	Object mPlayer;
-	glm::vec2 mPlayerSpeed = { 6.f, 6.f };
+	Object      mPlayer;
+	glm::vec2   mPlayerSpeed = { 6.f, 6.f };
 
 	std::vector<std::unique_ptr<Object>> mObjects;
 
@@ -316,7 +317,7 @@ void setTexture(int i) {
 			game->Active()->mTexture->setWrapping(textures[i].wrapping);
 	}
 }
-
+#include <iostream>
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
 	if(action > 0) {
 		switch (key) {
@@ -344,9 +345,52 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 			case GLFW_KEY_S: {
 				if(mods & GLFW_MOD_CONTROL) {
 					// TODO: select file
-					std::string save_path = "res/level.xml";
+					std::string save_path = "res/level.yml";
+
+					YAML::Emitter savedata;
+
+					savedata << YAML::BeginMap;
+
+					savedata << YAML::Key << "player";
+					game->mPlayer.write(savedata);
+
+					savedata << YAML::Key << "objects";
+					savedata << YAML::BeginSeq;
+					for(size_t i = 0; i < game->mObjects.size(); i++) {
+						savedata << YAML::Value;
+						game->mObjects[i]->write(savedata);
+					}
+					savedata << YAML::EndSeq;
+
+					savedata << YAML::EndMap;
+
+					std::ofstream file(save_path);
+					if(file)
+						file << savedata.c_str();
+					else
+						printf("Failed writing save to %s: Failed opening file.\n", save_path.c_str());
 				}
 			} break;
+			case GLFW_KEY_O: {
+				std::ifstream file("res/level.yml");
+				if(!file) break;
+
+				YAML::Node data = YAML::Load(file);
+				if(YAML::Node n = data["player"])
+					game->mPlayer.read(n);
+
+				if(YAML::Node objects = data["objects"]) {
+					game->mObjects.clear();
+
+					for(YAML::Node nn : objects) {
+						game->mObjects.emplace_back(new Object);
+						game->mObjects.back()->read(nn);
+						game->mLevel.addObject(game->mObjects.back().get());
+					}
+				}
+			} break;
+			case GLFW_KEY_UP:   game->Active()->mHeight += 0.1f; break;
+			case GLFW_KEY_DOWN: game->Active()->mHeight -= 0.1f; break;
 		}
 
 	}
