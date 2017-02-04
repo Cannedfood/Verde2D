@@ -3,6 +3,8 @@
 #include "StaticGraphics.hpp"
 
 #include <unordered_map>
+#include <cstring>
+#include <fstream>
 
 std::unordered_map<std::string, std::shared_ptr<Graphics>>* pGraphicsCache = nullptr;
 
@@ -22,9 +24,18 @@ std::shared_ptr<Graphics> Graphics::Load(const std::string &s) {
 	if(pGraphicsCache) {
 		auto& p = (*pGraphicsCache)[s];
 		if(!p) {
-			p = std::make_shared<StaticGraphics>();
-			if(!((StaticGraphics*)p.get())->load(s)) // Failed loading texture
-				p.reset();
+			if(s.size() > 4 && strcmp(s.c_str() + s.size() - 4, ".yml") == 0) {
+				std::ifstream file(s);
+				if(!file)
+					printf("Failed loading description file %s\n", s.c_str());
+				else
+					return Graphics::Load(YAML::Load(file));
+			}
+			else {
+				p = std::make_shared<StaticGraphics>();
+				if(!((StaticGraphics*)p.get())->load(s)) // Failed loading texture
+					p.reset();
+			}
 		}
 		return p;
 	}
@@ -40,7 +51,22 @@ std::shared_ptr<Graphics> Graphics::Load(const std::string &s) {
 std::shared_ptr<Graphics> Graphics::Load(YAML::Node n) {
 	if(!n) return nullptr;
 
-	auto p = Load(n["path"].as<std::string>());
+	if(n.IsScalar())
+		return Load(n.as<std::string>());
+
+	std::shared_ptr<Graphics> p;
+
+	YAML::Node type_n = n["type"];
+	if(type_n) {
+		std::string type_s = type_n.as<std::string>();
+		if(type_s != "default") {
+			// TODO: load other types
+			printf("Graphics: Type %s not supported\n", type_s.c_str());
+			return nullptr;
+		}
+	}
+
+	p = Load(n["texture"].as<std::string>());
 
 	if(YAML::Node nn = n["wrapping"]) {
 		p->setWrapping({

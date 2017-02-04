@@ -75,7 +75,5 @@ void Texture::bind() {
 }
 
 void Texture::write(YAML::Emitter& e) {
-	e << YAML::BeginMap;
-	e << YAML::Key << "path" << YAML::Value << mFile;
-	e << YAML::EndMap;
+	e << mFile;
 }

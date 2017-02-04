@@ -1,11 +1,13 @@
 #include <GLFW/glfw3.h>
 
-#include <cstdio>
-#include <cstdlib>
-#include <list>
+#include <iostream>
+#include <fstream>
 #include <thread>
 #include <chrono>
-#include <fstream>
+#include <list>
+
+#include <cstdio>
+#include <cstdlib>
 
 #include "Level.hpp"
 #include "Object.hpp"
@@ -218,11 +220,10 @@ public:
 			mLevel.draw(viewArea);
 
 			if(mEditor.active) {
-				glLineWidth(3);
 				glDisable(GL_TEXTURE_2D);
-				mLevel.debugDraw(viewArea);
 
 				if(mEditor.selected) {
+					glLineWidth(5);
 					glColor3f(1, 1, 0);
 					Box& b = mEditor.selected->mBounds;
 					glBegin(GL_LINE_LOOP);
@@ -231,7 +232,14 @@ public:
 						glVertex2fv(&b.max[0]);
 						glVertex2f (b.min.x, b.max.y);
 					glEnd();
+					glBegin(GL_POINTS);
+						glColor3f(1, 0, 0);
+						glVertex2fv(&mEditor.selected->mPosition[0]);
+					glEnd();
 				}
+
+				glLineWidth(3);
+				mLevel.debugDraw(viewArea);
 			}
 
 			glfwSwapBuffers(mWindow);
@@ -254,14 +262,21 @@ void viewportChangedCallback(GLFWwindow* win, int w, int h) {
 }
 
 void onCursorUpdate() {
-	if(glfwGetMouseButton(game->mWindow, GLFW_MOUSE_BUTTON_LEFT) || glfwGetMouseButton(game->mWindow, GLFW_MOUSE_BUTTON_MIDDLE)) {
+	if(
+		glfwGetMouseButton(game->mWindow, GLFW_MOUSE_BUTTON_LEFT) ||
+		glfwGetMouseButton(game->mWindow, GLFW_MOUSE_BUTTON_MIDDLE) ||
+		glfwGetMouseButton(game->mWindow, GLFW_MOUSE_BUTTON_RIGHT)
+	) {
 		if(!game->mObjects.empty()) {
 			glm::vec2 mouse = game->MouseInLevel();
 			Box&      b     = game->Active()->mRelativeBounds;
 
-			glm::vec2 mdist = mouse - b.middle();
+			glm::vec2 mdist = mouse - game->Active()->mBounds.middle();
 
-			if(game->mEditor.snap) mouse = glm::round(mouse * game->mEditor.snap_dist) / game->mEditor.snap_dist;
+			if(game->mEditor.snap)
+				mouse = glm::round(mouse * game->mEditor.snap_dist) / game->mEditor.snap_dist;
+
+			mouse -= game->Active()->mPosition;
 
 			if(mdist.x < 0) b.min.x = mouse.x;
 			else            b.max.x = mouse.x;
@@ -333,7 +348,7 @@ void setTexture(int i) {
 			game->Active()->mGraphics->setWrapping(textures[i].wrapping);
 	}
 }
-#include <iostream>
+
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
 	if(action > 0) {
 		switch (key) {

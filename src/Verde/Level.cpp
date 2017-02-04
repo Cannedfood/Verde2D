@@ -55,7 +55,7 @@ void Level::addObject(Object* o, int type) {
 
 	o->mLevel = this;
 
-	printf("Added object %p\n", o);
+	//printf("Added object %p\n", o);
 }
 
 void Level::addOwned(std::unique_ptr<Object>&& o, int type) {
@@ -82,7 +82,7 @@ void Level::removeObject(Object *o) {
 
 	o->_onRemove();
 
-	printf("Removed object %p\n", o);
+	//printf("Removed object %p\n", o);
 }
 
 void Level::debugDraw(const Box& b) {

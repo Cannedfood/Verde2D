@@ -4,7 +4,9 @@
 #include "Graphics.hpp"
 
 class AtlasAnimation : public Graphics, public Texture {
+	unsigned mNumFrames;
 	unsigned mTilesS, mTilesT;
+	float    mFrameTime;
 
 	AtlasAnimation();
 	~AtlasAnimation();

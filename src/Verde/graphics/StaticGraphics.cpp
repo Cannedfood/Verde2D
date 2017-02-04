@@ -34,13 +34,19 @@ void StaticGraphics::draw(const Object* o) {
 }
 
 void StaticGraphics::write(YAML::Emitter& e) {
+	e << YAML::BeginMap;
+
+	e << YAML::Key << "type" << "default";
+
 	if(mDoesWrap) {
-		e << YAML::Key << "wrapping" << YAML::BeginSeq;
+		e << YAML::Flow << YAML::Key << "wrapping" << YAML::BeginSeq;
 		e << mWrapping.x << mWrapping.y;
-		e << YAML::EndSeq;
+		e << YAML::EndSeq << YAML::Auto;
 	}
 
-	Texture::write(e);
+	e << YAML::Key << "texture"; Texture::write(e);
+
+	e << YAML::EndMap;
 }
 
 bool StaticGraphics::setWrapping(const glm::vec2& wrapping) {
