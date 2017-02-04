@@ -5,10 +5,11 @@
 #include <memory>
 #include <yaml-cpp/yaml.h>
 
+class Texture;
+
 class Chunk {
 	Level*                   mLevel;
 	glm::vec2                mOffset;
-	std::shared_ptr<Texture> mBackground;
 
 	std::vector<std::unique_ptr<Object>> mObjects;
 public:

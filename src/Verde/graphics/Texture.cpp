@@ -1,14 +1,14 @@
 #include "Texture.hpp"
 
 #define STB_IMAGE_IMPLEMENTATION
-#include "3rd_party/stb_image.h"
+#include "../3rd_party/stb_image.h"
 
 #include <GL/gl.h>
 
+#include <chrono>
+
 Texture::Texture() :
-	mHandle(0),
-	mWorldSize(1),
-	mDoesWrap(false)
+	mHandle(0)
 {}
 
 Texture::~Texture() {
@@ -57,9 +57,8 @@ bool Texture::load(const std::string& s) {
 	stbi_image_free(data);
 
 	mFile = s;
-	mLoadTime = duration_cast<microseconds>(steady_clock::now().time_since_epoch()) - beg;
 
-	printf("Loaded %s (%.2fms)\n", s.c_str(), mLoadTime.count() * 0.001f);
+	printf("Loaded %s (%.2fms)\n", s.c_str(), (duration_cast<microseconds>(steady_clock::now().time_since_epoch()) - beg).count() * 0.001f);
 	return true;
 }
 
@@ -75,63 +74,8 @@ void Texture::bind() {
 	glBindTexture(GL_TEXTURE_2D, mHandle);
 }
 
-#include <unordered_map>
-
-std::unordered_map<std::string, std::shared_ptr<Texture>>* pTextureCache = nullptr;
-
-void Texture::InitCache() {
-	pTextureCache = new std::unordered_map<std::string, std::shared_ptr<Texture>>;
-}
-
-void Texture::FreeCache() {
-	delete pTextureCache;
-}
-
-void Texture::CleanCache() {
-	// TODO: remove unique shared_ptr from cache
-}
-
-std::shared_ptr<Texture> Texture::Load(const std::string &s) {
-	if(pTextureCache) {
-		auto& p = (*pTextureCache)[s];
-		if(!p) {
-			p = std::make_shared<Texture>();
-			if(!p->load(s)) // Failed loading texture
-				p.reset();
-		}
-		return p;
-	}
-	else {
-		auto p = std::make_shared<Texture>();
-		if(p->load(s))
-			return p;
-		else
-			return nullptr;
-	}
-}
-
-std::shared_ptr<Texture> Texture::Load(YAML::Node n) {
-	if(!n) return nullptr;
-
-	auto p = Load(n["path"].as<std::string>());
-
-	if(YAML::Node nn = n["wrapping"]) {
-		p->setWrapping({
-			nn[0].as<float>(),
-			nn[1].as<float>()
-		});
-	}
-
-	return p;
-}
-
 void Texture::write(YAML::Emitter& e) {
 	e << YAML::BeginMap;
 	e << YAML::Key << "path" << YAML::Value << mFile;
-	if(mDoesWrap) {
-		e << YAML::Key << "wrapping" << YAML::BeginSeq;
-			e << mWorldSize.x << mWorldSize.y;
-		e << YAML::EndSeq;
-	}
 	e << YAML::EndMap;
 }

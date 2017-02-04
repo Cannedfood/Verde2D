@@ -6,3 +6,6 @@ Makefile
 *.make
 
 res/level.yml
+res/sfx
+res/tex
+res/prefab

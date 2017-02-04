@@ -9,7 +9,7 @@
 
 #include "Level.hpp"
 #include "Object.hpp"
-#include "Texture.hpp"
+#include "graphics/Graphics.hpp"
 
 using namespace std;
 using namespace std::chrono;
@@ -75,10 +75,10 @@ public:
 		mObjects.back()->mRelativeBounds = bounds;
 		mObjects.back()->mPosition = glm::vec2{0};
 		mLevel.addObject(mObjects.back().get(), Object::STATIC);
-		mObjects.back()->setTexture(
+		mObjects.back()->setGraphics(
 			"res/rock.png"
 		);
-		mObjects.back()->mTexture->setWrapping(glm::vec2{1.f});
+		mObjects.back()->mGraphics->setWrapping(glm::vec2{1.f});
 		mEditor.selected = mObjects.back().get();
 	}
 
@@ -101,7 +101,7 @@ public:
 
 		viewportChangedCallback(mWindow, 800, 600);
 
-		Texture::InitCache();
+		Graphics::InitCache();
 
 
 		// Test objects
@@ -112,7 +112,7 @@ public:
 		mPlayer.mPosition = { 1, 4 };
 		mLevel.addObject(&mPlayer, Object::DYNAMIC);
 
-		mPlayer.setTexture("/home/benno/Downloads/danks.jpg");
+		mPlayer.setGraphics("/home/benno/Downloads/danks.jpg");
 
 		AddGround({
 			{ 0,  0 },
@@ -124,7 +124,7 @@ public:
 	}
 
 	void Quit() {
-		Texture::FreeCache();
+		Graphics::FreeCache();
 		glfwDestroyWindow(mWindow);
 		glfwTerminate();
 	}
@@ -172,11 +172,11 @@ public:
 
 			if(glfwGetKey(mWindow, GLFW_KEY_D)) {
 				mPlayer.mMotion.x = mPlayerSpeed.x;
-				mPlayer.setTexture("res/sprite-r.png");
+				mPlayer.setGraphics("res/sprite-r.png");
 			}
 			else if(glfwGetKey(mWindow, GLFW_KEY_A)) {
 				mPlayer.mMotion.x = -mPlayerSpeed.x;
-				mPlayer.setTexture("res/sprite-l.png");
+				mPlayer.setGraphics("res/sprite-l.png");
 			}
 			else
 				mPlayer.mMotion.x = 0;
@@ -293,7 +293,7 @@ void clickCallback(GLFWwindow* win, int btn, int action, int mods) {
 
 void dropCallback(GLFWwindow* w, int count, const char** data) {
 	if(count > 0)
-		game->Active()->setTexture(data[count - 1]);
+		game->Active()->setGraphics(data[count - 1]);
 }
 
 void setTexture(int i) {
@@ -312,9 +312,9 @@ void setTexture(int i) {
 			{ "res/ground.png", true, { 1, 1 } }
 		};
 
-		game->Active()->setTexture(textures[i].path);
-		if(textures[i].wraps && game->Active()->mTexture)
-			game->Active()->mTexture->setWrapping(textures[i].wrapping);
+		game->Active()->setGraphics(textures[i].path);
+		if(textures[i].wraps && game->Active()->mGraphics)
+			game->Active()->mGraphics->setWrapping(textures[i].wrapping);
 	}
 }
 #include <iostream>

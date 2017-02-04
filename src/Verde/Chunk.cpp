@@ -1,6 +1,6 @@
 #include "Chunk.hpp"
 
-#include "Texture.hpp"
+#include "graphics/Texture.hpp"
 #include "Level.hpp"
 
 bool Chunk::remove(Object* o) {
@@ -37,8 +37,6 @@ void Chunk::read(YAML::Node n) {
 			mLevel->addObject(mObjects.back().get());
 		}
 	}
-
-	mBackground = Texture::Load(n["texture"]);
 }
 
 void Chunk::write(YAML::Emitter& e) {
@@ -55,11 +53,6 @@ void Chunk::write(YAML::Emitter& e) {
 		for(auto& a : mObjects)
 			a->write(e);
 		e << EndSeq;
-	}
-
-	if(mBackground) {
-		e << Key << "background";
-		mBackground->write(e);
 	}
 
 	e << EndMap;

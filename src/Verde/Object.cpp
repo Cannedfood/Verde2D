@@ -2,7 +2,8 @@
 
 #include "Level.hpp"
 
-#include "Texture.hpp"
+#include "graphics/Texture.hpp"
+#include "graphics/Graphics.hpp"
 
 Object::Object() :
 	mLevel(nullptr),
@@ -16,8 +17,8 @@ Object::~Object() {
 	}
 }
 
-void Object::setTexture(const std::string &file) {
-	mTexture = Texture::Load(file);
+void Object::setGraphics(const std::string &file) {
+	mGraphics = Graphics::Load(file);
 }
 
 void Object::_onRemove() {
@@ -25,30 +26,6 @@ void Object::_onRemove() {
 	if(mFlags & F_OWNED_BY_LEVEL)
 		delete this;
 }
-
-/*
-void Object::write(YAML::Node& n) {
-	if(mMotion.x != 0 || mMotion.y != 0) {
-		YAML::Node m = n["motion"];
-		m.push_back(mMotion.x);
-		m.push_back(mMotion.y);
-	}
-
-	if(mPosition.x != 0 || mPosition.y != 0) {
-		YAML::Node m = n["position"];
-		m.push_back(mPosition.x);
-		m.push_back(mPosition.y);
-	}
-
-	{
-		YAML::Node nn = n["bounds"];
-		nn[0] = mRelativeBounds.min.x;
-		nn[1] = mRelativeBounds.min.y;
-		nn[2] = mRelativeBounds.max.x;
-		nn[3] = mRelativeBounds.max.y;
-	}
-}
-*/
 
 void Object::write(YAML::Emitter& e) {
 	e << YAML::BeginMap;
@@ -74,9 +51,9 @@ void Object::write(YAML::Emitter& e) {
 	e << mRelativeBounds.min.x << mRelativeBounds.min.y << mRelativeBounds.max.x << mRelativeBounds.max.y;
 	e << YAML::EndSeq;
 
-	if(mTexture) {
-		e << YAML::Key << "texture";
-		mTexture->write(e);
+	if(mGraphics) {
+		e << YAML::Key << "graphics";
+		mGraphics->write(e);
 	}
 
 	e << YAML::EndMap;
@@ -103,5 +80,5 @@ void Object::read(YAML::Node& n) {
 	}
 	else puts("NO BOUNDS!!");
 
-	mTexture = Texture::Load(n["texture"]);
+	mGraphics = Graphics::Load(n["graphics"]);
 }

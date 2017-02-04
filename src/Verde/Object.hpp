@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Box.hpp"
+#include "ObjectScript.hpp"
 
 #include <glm/glm.hpp>
 #include <memory>
@@ -8,7 +9,7 @@
 #include <yaml-cpp/yaml.h>
 
 
-class Texture;
+class Graphics;
 class Level;
 class Chunk;
 
@@ -33,8 +34,9 @@ public:
 	Box       mRelativeBounds;
 	Box       mBounds;
 
-	std::shared_ptr<Texture> mTexture;
-
+	double                        mAnimationTime = 0;
+	std::shared_ptr<Graphics>     mGraphics;
+	std::unique_ptr<ObjectScript> mScript;
 
 	enum Flags {
 		F_OWNED_BY_LEVEL = 1, //< Marks that this entity should be deleted when it's removed. You can still delete this object manually though.
@@ -46,7 +48,7 @@ public:
 	Object();
 	~Object();
 
-	void setTexture(const std::string& file);
+	void setGraphics(const std::string& file);
 
 	void _onRemove();
 
