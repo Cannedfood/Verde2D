@@ -7,7 +7,8 @@
 
 Object::Object() :
 	mLevel(nullptr),
-	mType(DYNAMIC)
+	mType(DYNAMIC),
+	mAnimationTime(0)
 {}
 
 Object::~Object() {

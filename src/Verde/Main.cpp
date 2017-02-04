@@ -115,9 +115,15 @@ public:
 		glfwSetMouseButtonCallback(mWindow, clickCallback);
 		glfwSetKeyCallback(mWindow, keyCallback);
 		glfwSetDropCallback(mWindow, dropCallback);
-		glfwSwapInterval(1);
 
-		viewportChangedCallback(mWindow, 800, 600);
+		if(YAML::Node n = GetSettings()["graphics"]["vsync"])
+			glfwSwapInterval(n.as<bool>() ? 1 : 0);
+		else {
+			n = true;
+			glfwSwapInterval(1);
+		}
+
+		viewportChangedCallback(mWindow, width, height);
 
 		Graphics::InitCache();
 
@@ -129,8 +135,6 @@ public:
 		};
 		mPlayer.mPosition = { 1, 4 };
 		mLevel.addObject(&mPlayer, Object::DYNAMIC);
-
-		mPlayer.setGraphics("/home/benno/Downloads/danks.jpg");
 
 		AddGround({
 			{ 0,  0 },
@@ -244,9 +248,10 @@ public:
 
 			glfwSwapBuffers(mWindow);
 
-			if(print_timer > 0.5f) {
+			if(print_timer > 5) {
 				print_timer = 0;
-				//printf("dt (secs): %f\n", accum_time / frames);
+				float avg_dt = accum_time / frames;
+				printf("dt (secs): %.2f (%.1fFPS)\n", avg_dt, 1 / avg_dt);
 			}
 		}
 

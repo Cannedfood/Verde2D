@@ -7,6 +7,9 @@
 class Object;
 
 class Graphics {
+private:
+	std::string mLoadedFrom;
+
 public:
 	virtual ~Graphics() {}
 

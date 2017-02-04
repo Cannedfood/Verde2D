@@ -1,6 +1,7 @@
 #include "Graphics.hpp"
 
 #include "StaticGraphics.hpp"
+#include "AtlasAnimation.hpp"
 
 #include <unordered_map>
 #include <cstring>
@@ -60,7 +61,16 @@ std::shared_ptr<Graphics> Graphics::Load(YAML::Node n) {
 	if(type_n) {
 		std::string type_s = type_n.as<std::string>();
 		if(type_s != "default") {
-			// TODO: load other types
+			if(type_s == "atlas-animation") {
+				p = std::make_shared<AtlasAnimation>();
+				if(((AtlasAnimation*) p.get())->load(n))
+					return p;
+				else {
+					printf("Failed loading atlas-animation\n");
+					return nullptr;
+				}
+			}
+
 			printf("Graphics: Type %s not supported\n", type_s.c_str());
 			return nullptr;
 		}

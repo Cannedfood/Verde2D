@@ -5,11 +5,12 @@
 
 class AtlasAnimation : public Graphics, public Texture {
 	unsigned mNumFrames;
-	unsigned mTilesS, mTilesT;
+	unsigned mTiles;
 	float    mFrameTime;
 
+public:
 	AtlasAnimation();
-	~AtlasAnimation();
+	~AtlasAnimation() override;
 
 	bool load(YAML::Node& n);
 
