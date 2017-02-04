@@ -1,0 +1,13 @@
+graphics:
+  vsync: false
+  fullscreen: false
+  force_resolution: false
+  samples: 0
+  resolution:
+    - 800
+    - 600
+audio:
+  sources_ambient: 1
+  sources_entity: 3
+  sources_sfx: 2
+  sources_dialogue: 1

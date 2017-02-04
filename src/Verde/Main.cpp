@@ -10,6 +10,7 @@
 #include "Level.hpp"
 #include "Object.hpp"
 #include "graphics/Graphics.hpp"
+#include "Settings.hpp"
 
 using namespace std;
 using namespace std::chrono;
@@ -84,9 +85,24 @@ public:
 
 	void Init() {
 		glfwInit();
-		glfwWindowHint(GLFW_SAMPLES, 16);
+
+		int width = 800, height = 600;
+
+		if(YAML::Node n = GetSettings()["graphics"]["resolution"]) {
+			width = n[0].as<int>();
+			height = n[1].as<int>();
+		}
+		else {
+			n[0] = width;
+			n[1] = height;
+		}
+
+		if(YAML::Node n = GetSettings()["graphics"]["samples"])
+			glfwWindowHint(GLFW_SAMPLES, glm::max(1, n.as<int>()));
+		else n = 1;
+
 		glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_TRUE);
-		mWindow = glfwCreateWindow(800, 600, "Verde", NULL, NULL);
+		mWindow = glfwCreateWindow(width, height, "Verde", NULL, NULL);
 		if(!mWindow) {
 			printf("Failed creating window\n");
 			exit(-1);
@@ -397,7 +413,25 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 }
 
 int main(int argc, char** argv) {
+	const std::string settings_path = "res/settings.yml";
+
+	{
+		std::ifstream settings_file("res/settings.yml");
+		if(settings_file)
+			internal::Settings = YAML::Load(settings_file);
+		else
+			printf("No configuration file at %s\n", settings_path.c_str());
+	}
+
 	game = new Game();
 	game->Run();
 	delete game;
+
+	{
+		std::ofstream settings_file("res/settings.yml");
+		if(settings_file)
+			settings_file << internal::Settings;
+		else
+			printf("Failed writing settings to %s\n", settings_path.c_str());
+	}
 }
