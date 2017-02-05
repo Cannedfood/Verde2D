@@ -30,12 +30,12 @@ void HoverCamFollow::update(Object* o, float dt) {
 
 	if(mFollowing) {
 		if(Object* fol = o->mLevel->get(mFollowing)) {
-			const float break_speed = 4.f;
-			const float normal_speed = break_speed  * 2;
-			const float flee_speed   = normal_speed * 2;
+			const float break_speed  = 4.f;
+			const float normal_speed = 4.f;
+			const float flee_speed   = 16.f;
 
-			const float flee_to = 5.5f;
-			const float keep    = 5.f;
+			const float flee_to = 8.f;
+			const float keep    = 7.f;
 			const float flee_at = 2.5f;
 
 			glm::vec2 dif = fol->mPosition - o->mPosition;
@@ -50,15 +50,21 @@ void HoverCamFollow::update(Object* o, float dt) {
 				}
 				else
 					o->mMotion.x += std::copysign(normal_speed, dif.x) * dt;
+
+				o->mFlipOrientation = dif.x < 0;
 			}
 			else {
-				if(len >= flee_to)
-					mFlee = false;
+				if (len >= flee_to) {
+					if (o->mMotion.x * dif.x < -1)
+						o->mMotion.x *= 0.999f;
+					else
+						mFlee = false;
+				}
 				else
 					o->mMotion.x -= std::copysign(flee_speed, dif.x) * dt;
-			}
 
-			o->mFlipOrientation = dif.x < 0;
+				o->mFlipOrientation = dif.x > 0;
+			}
 		}
 	}
 }
