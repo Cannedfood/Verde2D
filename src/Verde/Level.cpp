@@ -298,15 +298,7 @@ bool Level::hitTest(const Box& b) {
 bool Level::hitTestArea(const Box& b, Box* intersection) {
 	bool first = true;
 
-	glDisable(GL_TEXTURE_2D);
-	glLineWidth(3);
-
-	glColor3d(0.0, 1.0, 0.85);
-	drawBBox(b);
-
-	glColor3d(1.0, 0.36, 0.0);
 	// OPTIMIZE: hopefully this expands, so we don't have if(first) all the time?
-
 	for(auto* o : mDynamicObjects) {
 		if(o->mBounds.touches(b)) {
 			if(first) {
@@ -330,8 +322,6 @@ bool Level::hitTestArea(const Box& b, Box* intersection) {
 			}
 		}
 	}
-
-	drawBBox(*intersection);
 
 	return !first;
 }
