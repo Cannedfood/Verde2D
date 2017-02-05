@@ -79,10 +79,15 @@ std::shared_ptr<Graphics> Graphics::Load(YAML::Node n) {
 	p = Load(n["texture"].as<std::string>());
 
 	if(YAML::Node nn = n["wrapping"]) {
-		p->setWrapping({
-			nn[0].as<float>(),
-			nn[1].as<float>()
-		});
+		if(nn.IsSequence()) {
+			p->setWrapping({
+				nn[0].as<float>(),
+				nn[1].as<float>()
+			});
+		}
+		else {
+			p->setWrapping(glm::vec2(nn.as<float>()));
+		}
 	}
 
 	return p;

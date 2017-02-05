@@ -5,6 +5,14 @@
 #include <GL/gl.h>
 #include <chrono>
 
+template<typename T>
+class Geronimo {
+	Geronimo();
+};
+
+template<typename T>
+Geronimo<T>::Geronimo() {}
+
 AtlasAnimation::AtlasAnimation() {}
 AtlasAnimation::~AtlasAnimation() {}
 
@@ -26,6 +34,10 @@ void AtlasAnimation::draw(const Object* o) {
 
 	glm::vec2 p0 = glm::vec2(p.x, p.y + tile_size);
 	glm::vec2 p1 = glm::vec2(p.x + tile_size, p.y);
+
+	if(o->mFlipOrientation)
+		std::swap(p0.x, p1.x);
+
 	glBegin(GL_TRIANGLE_STRIP);
 		glTexCoord2f(p0.x, p0.y); glVertex2fv(&o->mBounds.min[0]);
 		glTexCoord2f(p1.x, p0.y); glVertex2f (o->mBounds.max.x, o->mBounds.min.y);

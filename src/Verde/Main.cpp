@@ -135,6 +135,7 @@ public:
 		};
 		mPlayer.mPosition = { 1, 4 };
 		mLevel.addObject(&mPlayer, Object::DYNAMIC);
+		mLevel.alias(&mPlayer, "player");
 
 		AddGround({
 			{ 0,  0 },
@@ -303,7 +304,7 @@ void clickCallback(GLFWwindow* win, int btn, int action, int mods) {
 	if(action < 1) return;
 	switch (btn) {
 		case GLFW_MOUSE_BUTTON_RIGHT: {
-			game->mEditor.selected = game->mLevel.at(game->MouseInLevel(), Object::STATIC | Object::DYNAMIC);
+			game->mEditor.selected = game->mLevel.at(game->MouseInLevel(), Object::STATIC | Object::DYNAMIC | Object::PARTICLE);
 		} break;
 		case GLFW_MOUSE_BUTTON_MIDDLE: {
 			glm::vec2 p = game->MouseInLevel();

@@ -45,15 +45,29 @@ struct Box {
 	/// Returns a box representing the overlap between this and the other box
 	Box overlap(const Box& other) const {
 		return Box {
-			glm::min(min, other.min),
-			glm::max(max, other.max)
+			glm::max(min, other.min),
+			glm::min(max, other.max)
+		};
+	}
+
+	Box expand(const Box& other) {
+		return Box {
+			glm::max(max, other.max),
+			glm::min(min, other.min)
+		};
+	}
+
+	Box expand(const glm::vec2& p) {
+		return Box {
+			glm::max(max, p),
+			glm::min(min, p)
 		};
 	}
 
 	/// Returns the width/height of this box
 	glm::vec2 size() const { return max - min; }
 	/// Returns the 2d volume of this box
-	float     volume() const { return glm::compMul(size()); }
+	float     area() const { return glm::compMul(size()); }
 	/// Returns the middle point of this box
 	glm::vec2 middle() const { return (max + min) * 0.5f; }
 
@@ -62,5 +76,10 @@ struct Box {
 		glm::vec2 new_min = glm::min(min, max);
 		max = glm::max(min, max);
 		min = new_min;
+	}
+
+	/// Test if max is actually higher than min
+	bool valid() {
+		return max.x >= min.x && max.y >= min.y;
 	}
 };

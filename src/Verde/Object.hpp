@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Box.hpp"
-#include "ObjectScript.hpp"
+#include "behavior/Behavior.hpp"
 
 #include <glm/glm.hpp>
 #include <memory>
@@ -25,6 +25,7 @@ public:
 	Chunk*    mChunk;
 
 	Type      mType;
+	uint32_t  mId;
 
 	float     mHeight = 0;
 
@@ -34,9 +35,12 @@ public:
 	Box       mRelativeBounds;
 	Box       mBounds;
 
-	double                        mAnimationTime = 0;
-	std::shared_ptr<Graphics>     mGraphics;
-	std::unique_ptr<ObjectScript> mScript;
+	bool                      mFlipOrientation = false;
+	double                    mAnimationTime = 0;
+	std::shared_ptr<Graphics> mGraphics;
+	std::unique_ptr<Behavior> mBehavior;
+
+	YAML::Node mData;
 
 	enum Flags {
 		F_OWNED_BY_LEVEL = 1, //< Marks that this entity should be deleted when it's removed. You can still delete this object manually though.
@@ -51,7 +55,11 @@ public:
 	void setGraphics(const std::string& file);
 
 	void _onRemove();
+	void _onAttach();
 
 	void write(YAML::Emitter& to);
 	void read(YAML::Node& from);
+
+	uint32_t getId();
+	void alias(const std::string& alias);
 };

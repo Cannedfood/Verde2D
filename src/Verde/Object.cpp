@@ -8,7 +8,8 @@
 Object::Object() :
 	mLevel(nullptr),
 	mType(DYNAMIC),
-	mAnimationTime(0)
+	mAnimationTime(0),
+	mId(0)
 {}
 
 Object::~Object() {
@@ -26,6 +27,10 @@ void Object::_onRemove() {
 	mLevel = nullptr;
 	if(mFlags & F_OWNED_BY_LEVEL)
 		delete this;
+}
+
+void Object::_onAttach() {
+	if(mBehavior) mBehavior->start(this);
 }
 
 void Object::write(YAML::Emitter& e) {
@@ -57,6 +62,14 @@ void Object::write(YAML::Emitter& e) {
 		mGraphics->write(e);
 	}
 
+	if(mBehavior) {
+		e << YAML::Key << "behavior"; mBehavior->write(this, e);
+	}
+
+	if(mData) {
+		e << YAML::Key << "data" << mData;
+	}
+
 	e << YAML::EndMap;
 }
 
@@ -79,7 +92,18 @@ void Object::read(YAML::Node& n) {
 		mRelativeBounds.max.x = nn[2].as<float>();
 		mRelativeBounds.max.y = nn[3].as<float>();
 	}
-	else puts("NO BOUNDS!!");
+	else puts("NO BOUNDS!!?");
 
 	mGraphics = Graphics::Load(n["graphics"]);
+	Behavior::LoadBehavior(this, n["behavior"]);
+	mData     = n["data"];
+}
+
+uint32_t Object::getId() {
+	if(mId == 0) mLevel->__createId(this);
+	return mId;
+}
+
+void Object::alias(const std::string &alias) {
+	mLevel->alias(this, alias);
 }

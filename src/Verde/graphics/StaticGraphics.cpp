@@ -39,9 +39,14 @@ void StaticGraphics::write(YAML::Emitter& e) {
 	e << YAML::Key << "type" << "default";
 
 	if(mDoesWrap) {
-		e << YAML::Flow << YAML::Key << "wrapping" << YAML::BeginSeq;
-		e << mWrapping.x << mWrapping.y;
-		e << YAML::EndSeq << YAML::Auto;
+		if(mWrapping.x == mWrapping.y) {
+			e << YAML::Key << "wrapping" << mWrapping.x;
+		}
+		else {
+			e << YAML::Key << "wrapping" << YAML::Flow << YAML::BeginSeq;
+			e << mWrapping.x << mWrapping.y;
+			e << YAML::EndSeq << YAML::Auto;
+		}
 	}
 
 	e << YAML::Key << "texture"; Texture::write(e);

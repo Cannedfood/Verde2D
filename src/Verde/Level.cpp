@@ -45,6 +45,40 @@ Level::~Level() {
 	for(auto* o : mParticleObjects) o->_onRemove();
 }
 
+void Level::alias(Object *o, const std::string &alias) {
+	mObjectAlias.emplace(alias, o->getId());
+}
+
+uint32_t Level::getId(const std::string &alias) {
+	auto iter = mObjectAlias.find(alias);
+	if(iter == mObjectAlias.end())
+		return 0;
+	else
+		return iter->second;
+}
+
+Object* Level::get(const std::string &alias) {
+	// TODO: clean up aliases from time to time
+	auto iter = mObjectAlias.find(alias);
+	if(iter == mObjectAlias.end())
+		return nullptr;
+	else
+		return get(iter->second);
+}
+
+Object* Level::get(uint32_t id) {
+	return mObjectIds[id];
+}
+
+void Level::__createId(Object* o) {
+	o->mId = mNextId++;
+	mObjectIds.emplace(o->mId, o);
+}
+
+void Level::__freeId(uint32_t id) {
+	mObjectIds.erase(id);
+}
+
 void Level::addObject(Object* o, int type) {
 	switch(type) {
 		case Object::DYNAMIC:  mDynamicObjects.push_back(o);  o->mType = Object::DYNAMIC; break;
@@ -54,6 +88,7 @@ void Level::addObject(Object* o, int type) {
 	}
 
 	o->mLevel = this;
+	o->_onAttach();
 
 	//printf("Added object %p\n", o);
 }
@@ -78,6 +113,10 @@ void Level::removeObject(Object *o) {
 		case Object::PARTICLE:
 			mParticleObjects.erase(std::find(mParticleObjects.begin(), mParticleObjects.end(), o));
 		break;
+	}
+
+	if(o->mId != 0) {
+
 	}
 
 	o->_onRemove();
@@ -145,6 +184,16 @@ static void resolveTwoWay(std::vector<Object*>& a, std::vector<Object*>& b) {
 }
 
 void Level::update(float dt) {
+	for(auto* o : mStaticObjects) {
+		if(o->mBehavior) o->mBehavior->update(o, dt);
+	}
+	for(auto* o : mDynamicObjects) {
+		if(o->mBehavior) o->mBehavior->update(o, dt);
+	}
+	for(auto* o : mParticleObjects) {
+		if(o->mBehavior) o->mBehavior->update(o, dt);
+	}
+
 	auto comp = [](auto* a, auto* b) {
 		return a->mHeight < b->mHeight;
 	};
@@ -228,4 +277,57 @@ bool Level::at(const glm::vec2& p, std::vector<Object*>& to, size_t n, int types
 
 L_FINISHED:
 	return n - left;
+}
+
+bool Level::hitTest(const Box& b) {
+	for(auto* o : mDynamicObjects) {
+		if(o->mBounds.touches(b)) return true;
+	}
+
+	for(auto* o : mStaticObjects) {
+		if(o->mBounds.touches(b)) return true;
+	}
+
+	return false;
+}
+
+bool Level::hitTestArea(const Box& b, Box* intersection) {
+	bool first = true;
+
+	glDisable(GL_TEXTURE_2D);
+	glLineWidth(3);
+
+	glColor3d(0.0, 1.0, 0.85);
+	drawBBox(b);
+
+	glColor3d(1.0, 0.36, 0.0);
+	// OPTIMIZE: hopefully this expands, so we don't have if(first) all the time?
+
+	for(auto* o : mDynamicObjects) {
+		if(o->mBounds.touches(b)) {
+			if(first) {
+				first = false;
+				*intersection = b.overlap(o->mBounds);
+			}
+			else {
+				*intersection = intersection->expand(b.overlap(o->mBounds));
+			}
+		}
+	}
+
+	for(auto* o : mStaticObjects) {
+		if(o->mBounds.touches(b)) {
+			if(first) {
+				first = false;
+				*intersection = b.overlap(o->mBounds);
+			}
+			else {
+				*intersection = intersection->expand(b.overlap(o->mBounds));
+			}
+		}
+	}
+
+	drawBBox(*intersection);
+
+	return !first;
 }

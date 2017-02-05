@@ -1,0 +1,4 @@
+type: atlas-animation
+frames: 4
+fps: 5
+texture: res/prefab/HoverCam/idle.png
