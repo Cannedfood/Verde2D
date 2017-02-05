@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <glm/vec2.hpp>
+#include <string>
 
 namespace internal {
 	void InitAudio();

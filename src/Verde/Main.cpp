@@ -164,7 +164,7 @@ public:
 			float dt;
 			{
 				microseconds now = duration_cast<microseconds>(steady_clock::now().time_since_epoch());
-				dt = (now - last).count() * 0.000001;
+				dt = (float)((now - last).count() * 0.000001);
 				last = now;
 
 				print_timer += dt;
@@ -311,8 +311,8 @@ void clickCallback(GLFWwindow* win, int btn, int action, int mods) {
 			if(game->mEditor.snap) {
 				glm::vec2 pp = glm::round(p * game->mEditor.snap_dist) / game->mEditor.snap_dist;
 				glm::vec2 size = p - pp;
-				size.x = size.x < 0 ? -1 : 1;
-				size.y = size.y < 0 ? -1 : 1;
+				size.x = size.x < 0 ? -1.f : 1.f;
+				size.y = size.y < 0 ? -1.f : 1.f;
 
 				game->AddGround({
 					pp,

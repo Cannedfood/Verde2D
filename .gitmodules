@@ -4,3 +4,6 @@
 [submodule "src/lua"]
 	path = src/lua
 	url = https://github.com/lua/lua.git
+[submodule "src/glm"]
+	path = src/glm
+	url = https://github.com/g-truc/glm.git

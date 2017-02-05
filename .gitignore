@@ -5,4 +5,9 @@ doxy
 Makefile
 *.make
 
+.vs
+*.vcxproj.filters
+*.vcxproj
+*.sln
+
 TODO.md

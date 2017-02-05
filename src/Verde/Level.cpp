@@ -3,6 +3,10 @@
 #include "Object.hpp"
 #include "graphics/Graphics.hpp"
 
+#ifdef _WIN32
+#	include <Windows.h> // Dependency of include <GL/gl.h>
+#endif
+
 #include <GL/gl.h>
 
 #include <cstdio>
@@ -276,7 +280,7 @@ bool Level::at(const glm::vec2& p, std::vector<Object*>& to, size_t n, int types
 	}
 
 L_FINISHED:
-	return n - left;
+	return (n - left) != 0;
 }
 
 bool Level::hitTest(const Box& b) {

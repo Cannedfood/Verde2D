@@ -2,6 +2,10 @@
 
 #include "../Object.hpp"
 
+#ifdef _WIN32
+#	include <Windows.h> // Dependency of include <GL/gl.h>
+#endif
+
 #include <GL/gl.h>
 
 StaticGraphics::StaticGraphics() :
