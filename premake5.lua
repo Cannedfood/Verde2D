@@ -1,9 +1,14 @@
 workspace "Verde"
 	language "C++" flags "C++14"
 
-	configurations { "Release", "Debug" }
-	optimize "Debug"
-	symbols "On"
+	configurations { "Debug", "Release" }
+
+	filter "configurations:Debug"
+		optimize "Debug"
+		symbols "On"
+	filter "configurations:Release"
+		optimize "Speed"
+	filter "*"
 
 	startproject "verde"
 
@@ -21,6 +26,7 @@ if os.is "linux" then
 	}
 elseif os.is "windows" then
 	flags { "NoMinimalRebuild", "MultiProcessorCompile" }
+
 	libs = {
 		lua     = "lua32",
 		gl      = "OpenGL32.lib",

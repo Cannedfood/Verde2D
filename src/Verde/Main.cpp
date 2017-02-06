@@ -181,9 +181,9 @@ public:
 				float yscale = 2 * mCamZoom;
 
 				float projection_mat[] = {
-					xscale,                        0, 0, 0,
-					0,                   yscale, 0, 0,
-					0,                        0, 1, 0,
+					xscale, 0, 0, 0,
+					0, yscale, 0, 0,
+					0, 0, 1, 0,
 					-mCamPosition.x * xscale, -mCamPosition.y * yscale, 0, 1
 				};
 
@@ -205,8 +205,16 @@ public:
 				mPlayer.mMotion.x = 0;
 
 			if(glfwGetKey(mWindow, GLFW_KEY_SPACE) || glfwGetKey(mWindow, GLFW_KEY_W)) {
-				if(mPlayer.mMotion.y < 0)
-					mPlayer.mMotion.y = mPlayerSpeed.y;
+				if (mPlayer.mMotion.y < 0) {
+					bool on_ground = mLevel.hitTest({
+						{ mPlayer.mBounds.min.x, mPlayer.mBounds.min.y - 0.1f },
+						{ mPlayer.mBounds.max.x, mPlayer.mBounds.min.y - 0.01f }
+					});
+
+					if (on_ground) {
+						mPlayer.mMotion.y = mPlayerSpeed.y;
+					}
+				}
 				else
 					mPlayer.mMotion.y += mPlayerSpeed.y * 1.2f * dt;
 			}

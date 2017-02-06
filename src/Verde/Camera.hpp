@@ -2,6 +2,8 @@
 
 #include <list>
 
+#include "Box.hpp"
+
 namespace internal {
 	void UpdateCamera();
 }
