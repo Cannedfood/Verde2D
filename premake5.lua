@@ -20,6 +20,7 @@ if os.is "linux" then
 		openal  = "openal"
 	}
 elseif os.is "windows" then
+	flags { "NoMinimalRebuild", "MultiProcessorCompile" }
 	libs = {
 		lua     = "lua32",
 		gl      = "OpenGL32.lib",

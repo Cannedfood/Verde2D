@@ -13,7 +13,7 @@ void HoverCamFollow::write (Object* o, YAML::Emitter& e) {
 void HoverCamFollow::randomize() {
 	mHeight = 0.2f + (rand() % 100) * 0.01f;
 	mDistance = 0.5f + (rand() % 100) * 0.01f;
-	mRandomizeTime = 0.6f + (rand() % 100) * 0.007;
+	mRandomizeTime = 0.6f + (rand() % 100) * 0.007f;
 }
 
 void HoverCamFollow::start(Object *o) {
@@ -31,8 +31,8 @@ void HoverCamFollow::update(Object* o, float dt) {
 
 	Box intersect;
 	if(o->mLevel->hitTestArea(hover_volume, &intersect)) {
-		o->mMotion.y *= 0.999f;
-		o->mMotion.y += intersect.area() * 100 * dt;
+		o->mMotion.y -= std::copysign(1 * dt, o->mMotion.y);
+		o->mMotion.y += intersect.area() * 50 * dt;
 	}
 
 	mRandomizeTime -= dt;
