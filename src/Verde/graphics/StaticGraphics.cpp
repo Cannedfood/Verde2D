@@ -37,6 +37,34 @@ void StaticGraphics::draw(const Object* o) {
 	glEnd();
 }
 
+bool StaticGraphics::load(YAML::Node n) {
+	try {
+		if(n.IsScalar()) {
+			Texture::load(n.as<std::string>());
+		}
+		else {
+			Texture::load(n["texture"].as<std::string>());
+
+			if(YAML::Node nn = n["wrapping"]) {
+				if(nn.IsScalar()) {
+					mWrapping = glm::vec2(nn.as<float>());
+				}
+				else {
+					mWrapping = glm::vec2(
+						nn[0].as<float>(),
+						nn[1].as<float>()
+					);
+				}
+			}
+		}
+
+		return true;
+	}
+	catch(...) {
+		return false;
+	}
+}
+
 void StaticGraphics::write(YAML::Emitter& e) {
 	e << YAML::BeginMap;
 
@@ -53,7 +81,7 @@ void StaticGraphics::write(YAML::Emitter& e) {
 		}
 	}
 
-	e << YAML::Key << "texture"; Texture::write(e);
+	e << YAML::Key << "texture" << getImagePath();
 
 	e << YAML::EndMap;
 }

@@ -19,7 +19,7 @@ void AtlasAnimation::draw(const Object* o) {
 	glColor3f(1, 1, 1);
 	bind();
 
-	// TODO: create global time for each frame
+	// TODO: create global time variable instead of getting it here via chrono
 	double   animation_time = o->mAnimationTime - duration_cast<milliseconds>(steady_clock::now().time_since_epoch()).count() * 0.001;
 	unsigned frame = ((unsigned)std::floor(animation_time / mFrameTime)) % mNumFrames;
 	unsigned t = frame % mTiles; // OPTIMIZE: use the division we do anyways for manually calculating modulo
@@ -62,10 +62,14 @@ bool AtlasAnimation::load(YAML::Node& n) {
 		mFrameTime = 1 / 15.f;
 
 	if(YAML::Node nn = n["texture"])
-		return Texture::load(nn.as<std::string>());
+		return Texture::load(mFile = nn.as<std::string>());
 	else {
 		puts("atlas-animation needs a texture file to be declared.");
 		return false;
+	}
+
+	if(YAML::Node nn = n["loaded-from"]) {
+		mFile = nn.as<std::string>();
 	}
 }
 
@@ -75,6 +79,6 @@ void AtlasAnimation::write(YAML::Emitter& e) {
 	e << Key << "type"    << "atlas-animation";
 	e << Key << "frames"  << mNumFrames;
 	e << Key << "fps"     << 1.f / mFrameTime;
-	e << Key << "texture"; Texture::write(e);
+	e << Key << "file"    << mFile;
 	e  << EndMap;
 }

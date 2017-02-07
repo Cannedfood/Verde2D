@@ -8,13 +8,14 @@ class Object;
 
 class Graphics {
 private:
-	std::string mLoadedFrom;
+	std::string mPrefab;
 
 public:
 	virtual ~Graphics() {}
 
 	virtual void draw(const Object* onto) = 0;
 	virtual void write(YAML::Emitter& to) = 0;
+	void writeOrPrefab(YAML::Emitter& to);
 
 
 	virtual void setAnimationOffset(float sec) {}

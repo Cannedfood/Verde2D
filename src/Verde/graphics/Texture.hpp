@@ -8,16 +8,15 @@
 
 class Texture {
 	unsigned    mHandle;
-
 	std::string mFile;
 
 public:
 	Texture();
 	~Texture();
 
+	const std::string& getImagePath() { return mFile; }
+
 	bool load(const std::string& s);
 	void free();
 	void bind();
-
-	void write(YAML::Emitter& e);
 };

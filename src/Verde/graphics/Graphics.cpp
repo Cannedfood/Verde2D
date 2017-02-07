@@ -7,6 +7,13 @@
 #include <cstring>
 #include <fstream>
 
+void Graphics::writeOrPrefab(YAML::Emitter &to) {
+	if(mPrefab.size() != 0)
+		to << mPrefab;
+	else
+		write(to);
+}
+
 std::unordered_map<std::string, std::shared_ptr<Graphics>>* pGraphicsCache = nullptr;
 
 void Graphics::InitCache() {
@@ -26,23 +33,45 @@ std::shared_ptr<Graphics> Graphics::Load(const std::string &s) {
 		auto& p = (*pGraphicsCache)[s];
 		if(!p) {
 			if(s.size() > 4 && strcmp(s.c_str() + s.size() - 4, ".yml") == 0) {
-				std::ifstream file(s);
+				std::ifstream file(s, std::ios::binary);
 				if(!file)
 					printf("Failed loading description file %s\n", s.c_str());
-				else
-					return Graphics::Load(YAML::Load(file));
+				else {
+					YAML::Node data;
+					try {
+						data = YAML::Load(file);
+						p = Graphics::Load(data);
+						p->mPrefab = s;
+					}
+					catch(std::exception& e) {
+						printf("Failed loading %s: %s\n", s.c_str(), e.what());
+						return nullptr;
+					}
+				}
 			}
 			else {
 				p = std::make_shared<StaticGraphics>();
-				if(!((StaticGraphics*)p.get())->load(s)) // Failed loading texture
-					p.reset();
+
+				YAML::Node node;
+				node = s;
+
+				try {
+					if(!((StaticGraphics*)p.get())->load(node)) // Failed loading texture
+						p.reset();
+				}
+				catch(std::exception& e) {
+					printf("Failed loading %s: %s\n", s.c_str(), e.what());
+					return nullptr;
+				}
 			}
 		}
 		return p;
 	}
 	else {
 		auto p = std::make_shared<StaticGraphics>();
-		if(((StaticGraphics*)p.get())->load(s))
+		YAML::Node tmp;
+		tmp = s;
+		if(((StaticGraphics*)p.get())->load(tmp))
 			return p;
 		else
 			return nullptr;

@@ -59,7 +59,7 @@ void Object::write(YAML::Emitter& e) {
 
 	if(mGraphics) {
 		e << YAML::Key << "graphics";
-		mGraphics->write(e);
+		mGraphics->writeOrPrefab(e);
 	}
 
 	if(mBehavior) {

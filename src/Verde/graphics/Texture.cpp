@@ -61,7 +61,6 @@ bool Texture::load(const std::string& s) {
 	stbi_image_free(data);
 
 	mFile = s;
-
 	printf("Loaded %s (%.2fms)\n", s.c_str(), (duration_cast<microseconds>(steady_clock::now().time_since_epoch()) - beg).count() * 0.001f);
 	return true;
 }
@@ -70,14 +69,10 @@ void Texture::free() {
 	if(mHandle) {
 		glDeleteTextures(1, &mHandle);
 		mHandle = 0;
-		printf("Deleted %s\n", mFile.c_str());
+		mFile.clear();
 	}
 }
 
 void Texture::bind() {
 	glBindTexture(GL_TEXTURE_2D, mHandle);
-}
-
-void Texture::write(YAML::Emitter& e) {
-	e << mFile;
 }

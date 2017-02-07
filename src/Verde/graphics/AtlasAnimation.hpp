@@ -4,9 +4,10 @@
 #include "Graphics.hpp"
 
 class AtlasAnimation : public Graphics, public Texture {
-	unsigned mNumFrames;
-	unsigned mTiles;
-	float    mFrameTime;
+	unsigned    mNumFrames;
+	unsigned    mTiles;
+	float       mFrameTime;
+	std::string mFile;
 
 public:
 	AtlasAnimation();

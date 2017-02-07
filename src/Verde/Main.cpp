@@ -417,7 +417,9 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 				}
 			} break;
 			case GLFW_KEY_O: {
-				std::ifstream file("res/level.yml");
+				auto begin = high_resolution_clock::now();
+
+				std::ifstream file("res/level.yml", std::ios::binary);
 				if(!file) break;
 
 				YAML::Node data = YAML::Load(file);
@@ -433,6 +435,9 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 						game->mLevel.addObject(game->mObjects.back().get());
 					}
 				}
+
+				auto end = high_resolution_clock::now();
+				printf("Loading level took %fms\n", duration_cast<microseconds>(end - begin).count() * 0.001f);
 			} break;
 			case GLFW_KEY_UP:   game->Active()->mHeight += 0.1f; break;
 			case GLFW_KEY_DOWN: game->Active()->mHeight -= 0.1f; break;
@@ -445,7 +450,7 @@ int main(int argc, char** argv) {
 	const std::string settings_path = "res/settings.yml";
 
 	{
-		std::ifstream settings_file("res/settings.yml");
+		std::ifstream settings_file("res/settings.yml", std::ios::binary);
 		if(settings_file)
 			internal::Settings = YAML::Load(settings_file);
 		else
