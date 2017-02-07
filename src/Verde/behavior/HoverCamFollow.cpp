@@ -10,15 +10,15 @@ void HoverCamFollow::write (Object* o, YAML::Emitter& e) {
 	e << YAML::EndMap;
 }
 
+void HoverCamFollow::start(Object *o) {
+	mFollowing = o->mLevel->getId("player");
+	randomize();
+}
+
 void HoverCamFollow::randomize() {
 	mHeight = 0.2f + (rand() % 100) * 0.01f;
 	mDistance = 0.5f + (rand() % 100) * 0.01f;
 	mRandomizeTime = 0.6f + (rand() % 100) * 0.007f;
-}
-
-void HoverCamFollow::start(Object *o) {
-	mFollowing = o->mLevel->getId("player");
-	randomize();
 }
 
 void HoverCamFollow::update(Object* o, float dt) {

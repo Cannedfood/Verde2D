@@ -9,14 +9,6 @@
 #include <GL/gl.h>
 #include <chrono>
 
-template<typename T>
-class Geronimo {
-	Geronimo();
-};
-
-template<typename T>
-Geronimo<T>::Geronimo() {}
-
 AtlasAnimation::AtlasAnimation() {}
 AtlasAnimation::~AtlasAnimation() {}
 

@@ -1,20 +1,7 @@
-defs:
-  hovercam: &HOVERCAM
-    type: 4
-    motion: [-0.005183962, -0.001584778]
-    position: [-3.856092, 1.991273]
-    bounds: [-0.5, -0.5, 0.5, 0.5]
-    graphics:
-      type: atlas-animation
-      frames: 4
-      fps: 20
-      texture: res/prefab/HoverCam/idle.png
-    behavior:
-      type: hovercam-follow
 player:
   type: 2
-  motion: [0, -0.0010486]
-  position: [1.119707, 1.5]
+  motion: [0, -0.0009996]
+  position: [2.703912, 1.5]
   bounds: [-0.5, -0.5, 0.5, 0.5]
   graphics:
     type: default
@@ -50,15 +37,85 @@ objects:
       type: default
       wrapping: 1
       texture: res/ground.png
-  - *HOVERCAM
-  - *HOVERCAM
-  - *HOVERCAM
-  - *HOVERCAM
-  - *HOVERCAM
-  - *HOVERCAM
-  - *HOVERCAM
+  - type: 4
+    motion: [0.03270216, 0.3027816]
+    position: [-2.895499, 2.265535]
+    bounds: [-0.5, -0.5, 0.5, 0.5]
+    graphics:
+      type: atlas-animation
+      frames: 4
+      fps: 20
+      texture: res/prefab/HoverCam/idle.png
+    behavior:
+      type: hovercam-follow
+  - type: 4
+    motion: [2.616851, 1.095012]
+    position: [-5.114129, 2.211005]
+    bounds: [-0.5, -0.5, 0.5, 0.5]
+    graphics:
+      type: atlas-animation
+      frames: 4
+      fps: 20
+      texture: res/prefab/HoverCam/idle.png
+    behavior:
+      type: hovercam-follow
+  - type: 4
+    motion: [-0.4240753, -0.4102707]
+    position: [-4.553973, 3.290515]
+    bounds: [-0.5, -0.5, 0.5, 0.5]
+    graphics:
+      type: atlas-animation
+      frames: 4
+      fps: 20
+      texture: res/prefab/HoverCam/idle.png
+    behavior:
+      type: hovercam-follow
+  - type: 4
+    motion: [-0.4241308, -0.01763581]
+    position: [-4.911042, 1.903464]
+    bounds: [-0.5, -0.5, 0.5, 0.5]
+    graphics:
+      type: atlas-animation
+      frames: 4
+      fps: 20
+      texture: res/prefab/HoverCam/idle.png
+    behavior:
+      type: hovercam-follow
+  - type: 4
+    motion: [0.07686637, -1.89373]
+    position: [-5.85, 2.738468]
+    bounds: [-0.5, -0.5, 0.5, 0.5]
+    graphics:
+      type: atlas-animation
+      frames: 4
+      fps: 20
+      texture: res/prefab/HoverCam/idle.png
+    behavior:
+      type: hovercam-follow
+  - type: 4
+    motion: [-0.4240149, 2.628966]
+    position: [-1.973224, 2.449278]
+    bounds: [-0.5, -0.5, 0.5, 0.5]
+    graphics:
+      type: atlas-animation
+      frames: 4
+      fps: 20
+      texture: res/prefab/HoverCam/idle.png
+    behavior:
+      type: hovercam-follow
+  - type: 4
+    motion: [-0.4241131, -0.2757946]
+    position: [-3.515416, 1.88518]
+    bounds: [-0.5, -0.5, 0.5, 0.5]
+    graphics:
+      type: atlas-animation
+      frames: 4
+      fps: 20
+      texture: res/prefab/HoverCam/idle.png
+    behavior:
+      type: hovercam-follow
   - type: 1
-    bounds: [-15, 0.5, -14.5, 3]
+    bounds: [-15, 0.5, -14.5, 7.5]
     graphics:
       type: default
       wrapping: 1
