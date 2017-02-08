@@ -45,7 +45,7 @@ end
 if not os.findlib(libs.glfw) then
 	if os.is "windows" then
 		libs.glfw = "win/lib/%{cfg.shortname}/glfw3.lib"
-		includedirs "win/lib/include"
+		includedirs "win/include"
 	else
 		error "Couldn't find glfw. You seem to be on a unix system: install it."
 	end
@@ -54,7 +54,7 @@ end
 if not os.findlib(libs.openal) then
 	if os.is "windows" then
 		libs.openal = "win/lib/%{cfg.shortname}/OpenAL32.lib"
-		includedirs "win/lib/include"
+		includedirs "win/include"
 	else
 		error "Couldn't find openal. You seem to be on a unix system: install it."
 	end
@@ -95,7 +95,6 @@ end
 project "verde"
 	kind "WindowedApp"
 	files "src/Verde/**"
-	removefiles "src/Verde/Audio.*"
 	links {
 		libs.gl,
 		libs.glfw,
