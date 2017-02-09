@@ -14,6 +14,10 @@
 #include "graphics/Graphics.hpp"
 #include "Settings.hpp"
 
+#include "audio/Audio.hpp"
+#include "audio/AudioSource.hpp"
+#include "audio/AudioChunk.hpp"
+
 using namespace std;
 using namespace std::chrono;
 using namespace std::literals::chrono_literals;
@@ -62,15 +66,6 @@ public:
 
 	glm::vec2 MouseInLevel() {
 		return ViewportToLevel(mMouse);
-	}
-
-	Object* Active() {
-		if(mEditor.selected)
-			return mEditor.selected;
-		else if(mObjects.empty())
-			return nullptr;
-		else
-			return mEditor.selected = mObjects.back().get();
 	}
 
 	void AddGround(const Box& bounds) {
@@ -144,9 +139,13 @@ public:
 
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+		internal::InitAudio();
 	}
 
 	void Quit() {
+		internal::FreeAudio();
+
 		Graphics::FreeCache();
 		glfwDestroyWindow(mWindow);
 		glfwTerminate();
@@ -255,6 +254,7 @@ public:
 				mLevel.debugDraw(viewArea);
 			}
 
+			internal::UpdateAudio(mCamPosition, mCamZoom, dt);
 			glfwSwapBuffers(mWindow);
 
 			if(print_timer > 5) {
@@ -281,16 +281,16 @@ void onCursorUpdate() {
 		glfwGetMouseButton(game->mWindow, GLFW_MOUSE_BUTTON_MIDDLE) ||
 		glfwGetMouseButton(game->mWindow, GLFW_MOUSE_BUTTON_RIGHT)
 	) {
-		if(!game->mObjects.empty()) {
+		if(game->mEditor.selected) {
 			glm::vec2 mouse = game->MouseInLevel();
-			Box&      b     = game->Active()->mRelativeBounds;
+			Box&      b     = game->mEditor.selected->mRelativeBounds;
 
-			glm::vec2 mdist = mouse - game->Active()->mBounds.middle();
+			glm::vec2 mdist = mouse - game->mEditor.selected->mBounds.middle();
 
 			if(game->mEditor.snap)
 				mouse = glm::round(mouse * game->mEditor.snap_dist) / game->mEditor.snap_dist;
 
-			mouse -= game->Active()->mPosition;
+			mouse -= game->mEditor.selected->mPosition;
 
 			if(mdist.x < 0) b.min.x = mouse.x;
 			else            b.max.x = mouse.x;
@@ -312,7 +312,8 @@ void clickCallback(GLFWwindow* win, int btn, int action, int mods) {
 	if(action < 1) return;
 	switch (btn) {
 		case GLFW_MOUSE_BUTTON_RIGHT: {
-			game->mEditor.selected = game->mLevel.at(game->MouseInLevel(), Object::STATIC | Object::DYNAMIC | Object::PARTICLE);
+			if(Object* o = game->mLevel.at(game->MouseInLevel(), Object::STATIC | Object::DYNAMIC | Object::PARTICLE))
+				game->mEditor.selected = o;
 		} break;
 		case GLFW_MOUSE_BUTTON_MIDDLE: {
 			glm::vec2 p = game->MouseInLevel();
@@ -337,12 +338,12 @@ void clickCallback(GLFWwindow* win, int btn, int action, int mods) {
 }
 
 void dropCallback(GLFWwindow* w, int count, const char** data) {
-	if(count > 0)
-		game->Active()->setGraphics(data[count - 1]);
+	if(count > 0 && game->mEditor.selected)
+		game->mEditor.selected->setGraphics(data[count - 1]);
 }
 
 void setTexture(int i) {
-	if(!game->mObjects.empty()) {
+	if(game->mEditor.selected) {
 		i -= 1;
 
 		struct TexInfo {
@@ -357,9 +358,9 @@ void setTexture(int i) {
 			{ "res/ground.png", true, { 1, 1 } }
 		};
 
-		game->Active()->setGraphics(textures[i].path);
-		if(textures[i].wraps && game->Active()->mGraphics)
-			game->Active()->mGraphics->setWrapping(textures[i].wrapping);
+		game->mEditor.selected->setGraphics(textures[i].path);
+		if(textures[i].wraps && game->mEditor.selected->mGraphics)
+			game->mEditor.selected->mGraphics->setWrapping(textures[i].wrapping);
 	}
 }
 
@@ -379,6 +380,9 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 				break;
 			case GLFW_KEY_TAB:
 					game->mEditor.active = !game->mEditor.active;
+				break;
+			case GLFW_KEY_ESCAPE:
+					game->mEditor.selected = nullptr;
 				break;
 			case GLFW_KEY_1: setTexture(1); break;
 			case GLFW_KEY_2: setTexture(2); break;
@@ -439,8 +443,8 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 				auto end = high_resolution_clock::now();
 				printf("Loading level took %fms\n", duration_cast<microseconds>(end - begin).count() * 0.001f);
 			} break;
-			case GLFW_KEY_UP:   game->Active()->mHeight += 0.1f; break;
-			case GLFW_KEY_DOWN: game->Active()->mHeight -= 0.1f; break;
+			case GLFW_KEY_UP:   if(game->mEditor.selected) game->mEditor.selected->mHeight += 0.1f; break;
+			case GLFW_KEY_DOWN: if(game->mEditor.selected) game->mEditor.selected->mHeight -= 0.1f; break;
 		}
 
 	}
