@@ -8,7 +8,7 @@
 
 #include <yaml-cpp/yaml.h>
 
-
+class AudioSource;
 class Graphics;
 class Level;
 class Chunk;
@@ -35,10 +35,11 @@ public:
 	Box       mRelativeBounds;
 	Box       mBounds;
 
-	bool                      mFlipOrientation = false;
-	double                    mAnimationTime = 0;
-	std::shared_ptr<Graphics> mGraphics;
-	std::unique_ptr<Behavior> mBehavior;
+	bool                         mFlipOrientation = false;
+	double                       mAnimationTime = 0;
+	std::shared_ptr<Graphics>    mGraphics;
+	std::shared_ptr<AudioSource> mAudio;
+	std::unique_ptr<Behavior>    mBehavior;
 
 	YAML::Node mData;
 

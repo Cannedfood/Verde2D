@@ -39,50 +39,71 @@ objects:
   - type: 4
     motion: [-0.4371273, 0.313381]
     position: [-3.298295, 1.961175]
-    bounds: [-0.5, -0.5, 0.5, 0.5]
+    bounds: [-0.4, -0.4, 0.4, 0.4]
     graphics: res/prefab/HoverCam/HoverCamAnim.yml
+    audio:
+      file: res/prefab/HoverCam/hover.wav
+      loop: true
     behavior:
       type: hovercam-follow
   - type: 4
     motion: [-0.4368743, 1.484787]
     position: [-5.187737, 2.1829]
-    bounds: [-0.5, -0.5, 0.5, 0.5]
+    bounds: [-0.4, -0.4, 0.4, 0.4]
     graphics: res/prefab/HoverCam/HoverCamAnim.yml
+    audio:
+      file: res/prefab/HoverCam/hover.wav
+      loop: true
     behavior:
       type: hovercam-follow
   - type: 4
     motion: [3.704039, 0.514177]
     position: [-2.860822, 2.040783]
-    bounds: [-0.5, -0.5, 0.5, 0.5]
+    bounds: [-0.4, -0.4, 0.4, 0.4]
     graphics: res/prefab/HoverCam/HoverCamAnim.yml
+    audio:
+      file: res/prefab/HoverCam/hover.wav
+      loop: true
     behavior:
       type: hovercam-follow
   - type: 4
     motion: [-0.4371706, -3.169662]
     position: [-5.369864, 1.580676]
-    bounds: [-0.5, -0.5, 0.5, 0.5]
+    bounds: [-0.4, -0.4, 0.4, 0.4]
     graphics: res/prefab/HoverCam/HoverCamAnim.yml
+    audio:
+      file: res/prefab/HoverCam/hover.wav
+      loop: true
     behavior:
       type: hovercam-follow
   - type: 4
     motion: [-0.4298626, 0.5071907]
     position: [-5.52438, 2.154131]
-    bounds: [-0.5, -0.5, 0.5, 0.5]
+    bounds: [-0.4, -0.4, 0.4, 0.4]
     graphics: res/prefab/HoverCam/HoverCamAnim.yml
+    audio:
+      file: res/prefab/HoverCam/hover.wav
+      loop: true
     behavior:
       type: hovercam-follow
   - type: 4
     motion: [-0.4371705, 1.464834]
     position: [-2.432089, 1.758978]
-    bounds: [-0.5, -0.5, 0.5, 0.5]
+    bounds: [-0.4, -0.4, 0.4, 0.4]
     graphics: res/prefab/HoverCam/HoverCamAnim.yml
+    audio:
+      file: res/prefab/HoverCam/hover.wav
+      loop: true
     behavior:
       type: hovercam-follow
   - type: 4
     motion: [-0.2815025, 0.0235601]
     position: [-2.642725, 1.970378]
-    bounds: [-0.5, -0.5, 0.5, 0.5]
+    bounds: [-0.4, -0.4, 0.4, 0.4]
     graphics: res/prefab/HoverCam/HoverCamAnim.yml
+    audio:
+      file: res/prefab/HoverCam/hover.wav
+      loop: true
     behavior:
       type: hovercam-follow
   - type: 1

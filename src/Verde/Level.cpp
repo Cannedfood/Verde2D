@@ -2,6 +2,7 @@
 
 #include "Object.hpp"
 #include "graphics/Graphics.hpp"
+#include "audio/AudioSource.hpp"
 
 #ifdef _WIN32
 #	include <Windows.h> // Dependency of include <GL/gl.h>
@@ -189,13 +190,22 @@ static void resolveTwoWay(std::vector<Object*>& a, std::vector<Object*>& b) {
 
 void Level::update(float dt) {
 	for(auto* o : mStaticObjects) {
-		if(o->mBehavior) o->mBehavior->update(o, dt);
+		if(o->mAudio)
+			o->mAudio->setPosition(o->mPosition, o->mMotion);
+		if(o->mBehavior)
+			o->mBehavior->update(o, dt);
 	}
 	for(auto* o : mDynamicObjects) {
-		if(o->mBehavior) o->mBehavior->update(o, dt);
+		if(o->mAudio)
+			o->mAudio->setPosition(o->mPosition, o->mMotion);
+		if(o->mBehavior)
+			o->mBehavior->update(o, dt);
 	}
 	for(auto* o : mParticleObjects) {
-		if(o->mBehavior) o->mBehavior->update(o, dt);
+		if(o->mAudio)
+			o->mAudio->setPosition(o->mPosition, o->mMotion);
+		if(o->mBehavior)
+			o->mBehavior->update(o, dt);
 	}
 
 	auto comp = [](auto* a, auto* b) {

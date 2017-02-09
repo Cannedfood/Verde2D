@@ -23,6 +23,8 @@ using namespace std::chrono;
 using namespace std::literals::chrono_literals;
 
 bool Texture::load(const std::string& s) {
+	this->free();
+
 	auto beg = duration_cast<microseconds>(steady_clock::now().time_since_epoch());
 
 	int x, y, comp;
