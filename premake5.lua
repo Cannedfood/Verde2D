@@ -101,3 +101,7 @@ project "verde"
 		libs.yamlcpp,
 		libs.openal
 	}
+
+	if not os.is "windows" then
+		links "pthread"
+	end

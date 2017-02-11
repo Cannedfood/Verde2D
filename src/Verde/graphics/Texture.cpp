@@ -1,7 +1,7 @@
 #include "Texture.hpp"
 
 #define STB_IMAGE_IMPLEMENTATION
-#include "../3rd_party/stb_image.h"
+#include "3rd_party/stb_image.h"
 
 #ifdef _WIN32
 #	include <Windows.h> // Dependency of include <GL/gl.h>

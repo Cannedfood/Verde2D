@@ -15,8 +15,6 @@
 #include "Settings.hpp"
 
 #include "audio/Audio.hpp"
-#include "audio/AudioSource.hpp"
-#include "audio/AudioChunk.hpp"
 
 using namespace std;
 using namespace std::chrono;
@@ -254,7 +252,6 @@ public:
 				mLevel.debugDraw(viewArea);
 			}
 
-			internal::UpdateAudio(mCamPosition, mCamZoom, dt);
 			glfwSwapBuffers(mWindow);
 
 			if(print_timer > 5) {

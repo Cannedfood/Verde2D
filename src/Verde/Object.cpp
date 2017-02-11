@@ -5,8 +5,6 @@
 #include "graphics/Texture.hpp"
 #include "graphics/Graphics.hpp"
 
-#include "audio/AudioSource.hpp"
-
 Object::Object() :
 	mLevel(nullptr),
 	mType(DYNAMIC),
@@ -72,9 +70,11 @@ void Object::write(YAML::Emitter& e) {
 		e << YAML::Key << "data" << mData;
 	}
 
+	/*
 	if(mAudio) {
 		e << YAML::Key << "audio"; mAudio->write(e);
 	}
+	*/
 
 	e << YAML::EndMap;
 }
@@ -104,11 +104,13 @@ void Object::read(YAML::Node& n) {
 	Behavior::LoadBehavior(this, n["behavior"]);
 	mData     = n["data"];
 
+	/*
 	if(n["audio"]) {
 		std::shared_ptr<AudioSource> src = std::make_shared<AudioSource>();
 		if(src->load(n["audio"]))
 			mAudio = std::move(src);
 	}
+	*/
 }
 
 uint32_t Object::getId() {

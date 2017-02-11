@@ -1,26 +1,25 @@
 #pragma once
 
-#include <memory>
 #include <glm/vec2.hpp>
-#include <string>
+
+#include "AudioData.hpp"
 
 namespace internal {
+
 	void InitAudio();
 	void FreeAudio();
-	void UpdateAudio(const glm::vec2& camera_position, float camera_zoom, float dt);
+	void UpdateAudio();
+
 } /* internal */
 
-class AudioChunk;
-class AudioSource;
+class AudioNode {};
 
-std::shared_ptr<AudioChunk>  LoadSound(const std::string& name);
-std::shared_ptr<AudioSource> CreateSoundSource();
+std::shared_ptr<AudioData> OpenAudio(const char* path, AudioData::OpenType type = AudioData::AUTO);
 
-void SetAudioDistance(float z);
+void PlayBgm(const std::shared_ptr<AudioData>& data, float crossfade = 0, bool cubic_fade = false);
+void PlayBgm(const char* file, float crossfade = 0, bool cubic_fade = false);
 
-void PlaySound(AudioSource* source, AudioChunk* data);
+void PlaySfx(const glm::vec2& pos, const std::shared_ptr<AudioData>& data, float gain = 1);
+void PlaySfx(const glm::vec2& pos, const char* file, float gain = 1);
 
-void PlayAmbient(const std::shared_ptr<AudioChunk>& p, const glm::vec2& at, float volume);
-void PlayAmbient(const std::string& name, const glm::vec2& at, float volume);
-
-void SetBGM(const std::string& name, float fade);
+std::unique_ptr<AudioNode> CreateAudioNode();
