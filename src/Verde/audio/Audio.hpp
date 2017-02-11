@@ -22,4 +22,4 @@ void PlayBgm(const char* file, float crossfade = 0, bool cubic_fade = false);
 void PlaySfx(const glm::vec2& pos, const std::shared_ptr<AudioData>& data, float gain = 1);
 void PlaySfx(const glm::vec2& pos, const char* file, float gain = 1);
 
-std::unique_ptr<AudioNode> CreateAudioNode();
+std::unique_ptr<AudioNode> CreateAudioSource();

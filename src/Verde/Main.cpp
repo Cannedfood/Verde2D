@@ -381,10 +381,16 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 			case GLFW_KEY_ESCAPE:
 					game->mEditor.selected = nullptr;
 				break;
-			case GLFW_KEY_1: setTexture(1); break;
+			case GLFW_KEY_1: setTexture(1); putchar('\a'); break;
 			case GLFW_KEY_2: setTexture(2); break;
 			case GLFW_KEY_3: setTexture(3); break;
-			// case GLFW_KEY_4: setTexture(4); break;
+			case GLFW_KEY_M:
+				if(YAML::Node audio = GetSettings()["audio"]) {
+					if(YAML::Node bgm = audio["bgm"]) {
+						PlayBgm(bgm.as<std::string>("").c_str(), 2, false);
+					}
+				}
+				break;
 			case GLFW_KEY_K:
 				game->mEditor.snap = !game->mEditor.snap;
 				break;
