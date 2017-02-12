@@ -106,6 +106,7 @@ public:
 		viewportChangedCallback(mWindow, width, height);
 
 		Graphics::InitCache();
+		AudioData::InitCache();
 
 
 		// Test objects
@@ -132,6 +133,7 @@ public:
 		internal::FreeAudio();
 
 		Graphics::FreeCache();
+		AudioData::FreeCache();
 		glfwDestroyWindow(mWindow);
 		glfwTerminate();
 	}
@@ -161,6 +163,8 @@ public:
 			UpdateCam();
 			glMatrixMode(GL_PROJECTION);
 			glLoadMatrixf(CamTransform());
+
+			internal::UpdateAudio();
 
 			glClearColor(0, 0, 0, 1);
 			glClear(GL_COLOR_BUFFER_BIT);
@@ -367,6 +371,9 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 						PlayBgm(bgm.as<std::string>("").c_str(), 2, false);
 					}
 				}
+				break;
+			case GLFW_KEY_P:
+					PlaySfx("res/prefab/HoverCam/hover.wav", glm::vec2(0), 1, 1);
 				break;
 			case GLFW_KEY_K:
 				game->mEditor.snap = !game->mEditor.snap;

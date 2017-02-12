@@ -4,6 +4,8 @@
 
 #include "util/Alerror.hpp"
 
+#include "../Settings.hpp"
+
 void AudioContext::start() {
 	mRunning = true;
 	mThread = std::thread([this]() {
@@ -22,6 +24,7 @@ void AudioContext::start() {
 			}
 
 			mMusic->update(dt);
+			mSfx->update();
 			// TODO: update rest
 
 			std::this_thread::sleep_for(20ms);
@@ -44,6 +47,7 @@ AudioContext::~AudioContext() {
 	}
 
 	mMusic.reset();
+	mSfx.reset();
 
 	if(mContext) {
 		alcMakeContextCurrent(NULL);
@@ -79,6 +83,15 @@ bool AudioContext::init() {
 		mMusic.reset();
 		return false;
 	}
+
+	size_t n_sfx_sources = 8;
+	if(YAML::Node audio = GetSettings()["audio"]) {
+		if(YAML::Node srcs = audio["sources_sfx"]) {
+			n_sfx_sources = srcs.as<size_t>(n_sfx_sources);
+		}
+	}
+
+	mSfx.reset(new AudioSfx(n_sfx_sources));
 
 	start();
 

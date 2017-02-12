@@ -19,8 +19,8 @@ namespace AudioDataWav {
 		bool stream_it;
 		switch (type) {
 			case AudioData::AUTO:
-				// Larger than 100kB ? -> stream it
-				stream_it = (wav->totalSampleCount * wav->bytesPerSample) > (1024 * 100);
+				// Larger than 10mB ? -> stream it
+				stream_it = (wav->totalSampleCount * wav->bytesPerSample) > (1024 * 1024 * 10);
 				if(stream_it)
 					printf("[AUDIO WAV] Decided to stream '%s'\n", file);
 				else

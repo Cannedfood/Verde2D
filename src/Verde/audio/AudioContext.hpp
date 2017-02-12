@@ -6,6 +6,7 @@
 #include <AL/alc.h>
 
 #include "AudioMusic.hpp"
+#include "AudioSfx.hpp"
 
 class AudioContext {
 	std::mutex mMutex;
@@ -17,6 +18,7 @@ class AudioContext {
 	std::thread mThread;
 
 	std::unique_ptr<AudioMusic> mMusic;
+	std::unique_ptr<AudioSfx>   mSfx;
 
 	void start();
 public:
@@ -34,4 +36,5 @@ public:
 	}
 
 	inline AudioMusic& music() { return *mMusic; }
+	inline AudioSfx& sfx() { return *mSfx; }
 };

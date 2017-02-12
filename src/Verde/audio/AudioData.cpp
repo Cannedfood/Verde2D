@@ -13,6 +13,17 @@ bool ends_in_n(const char* a, size_t a_len, const char* b, size_t b_len) {
 
 static std::unordered_map<std::string, std::weak_ptr<AudioData>>* pAudioCache;
 
+void AudioData::InitCache() {
+	pAudioCache = new std::unordered_map<std::string, std::weak_ptr<AudioData>>;
+}
+void AudioData::FreeCache() {
+	delete pAudioCache;
+	pAudioCache = nullptr;
+}
+void AudioData::CleanCache() {
+
+}
+
 std::shared_ptr<AudioData> AudioData::OpenNotCached(const char* cpath, OpenType type) {
 	std::string path (cpath);
 
