@@ -12,6 +12,7 @@
 #include "Level.hpp"
 #include "Object.hpp"
 #include "graphics/Graphics.hpp"
+#include "graphics/Camera.hpp"
 #include "Settings.hpp"
 
 #include "audio/Audio.hpp"
@@ -33,10 +34,6 @@ public:
 	GLFWwindow* mWindow;
 
 	unsigned    mWidth, mHeight;
-	float       mAspect;
-
-	glm::vec2   mCamPosition;
-	float       mCamZoom = 0.1f;
 
 	Object      mPlayer;
 	glm::vec2   mPlayerSpeed = { 6.f, 6.f };
@@ -52,18 +49,8 @@ public:
 		Object* selected = nullptr;
 	} mEditor;
 
-	glm::vec2 ViewportToLevel(const glm::vec2& v) {
-		float yscale = 2 * mCamZoom;
-		float xscale = yscale * mAspect;
-
-		return {
-			mCamPosition.x + v.x / xscale,
-			mCamPosition.y + v.y / yscale
-		};
-	}
-
 	glm::vec2 MouseInLevel() {
-		return ViewportToLevel(mMouse);
+		return ViewportToWorld(mMouse);
 	}
 
 	void AddGround(const Box& bounds) {
@@ -170,22 +157,10 @@ public:
 			}
 
 			glfwPollEvents();
-
-			{
-				glMatrixMode(GL_PROJECTION);
-
-				float xscale = 2 * mCamZoom * mAspect;
-				float yscale = 2 * mCamZoom;
-
-				float projection_mat[] = {
-					xscale, 0, 0, 0,
-					0, yscale, 0, 0,
-					0, 0, 1, 0,
-					-mCamPosition.x * xscale, -mCamPosition.y * yscale, 0, 1
-				};
-
-				glLoadMatrixf(projection_mat);
-			}
+			// Camera
+			UpdateCam();
+			glMatrixMode(GL_PROJECTION);
+			glLoadMatrixf(CamTransform());
 
 			glClearColor(0, 0, 0, 1);
 			glClear(GL_COLOR_BUFFER_BIT);
@@ -216,31 +191,33 @@ public:
 					mPlayer.mMotion.y += mPlayerSpeed.y * 1.2f * dt;
 			}
 
-			mCamPosition = glm::mix(mCamPosition, mPlayer.mPosition, 0.01f);
+			CamPosition(glm::mix(CamPosition(), mPlayer.mPosition, 0.01f));
 
 			glLineWidth(4);
 			mLevel.update(dt);
 
-			Box viewArea {
-				ViewportToLevel(glm::vec2{-1.f}),
-				ViewportToLevel(glm::vec2{ 1.f})
-			};
-
 			glLineWidth(1);
-			mLevel.draw(viewArea);
+			mLevel.draw(CamBounds());
 
 			if(mEditor.active) {
 				glDisable(GL_TEXTURE_2D);
 
 				if(mEditor.selected) {
 					glLineWidth(5);
-					glColor3f(1, 1, 0);
 					Box& b = mEditor.selected->mBounds;
+					glColor3f(1, 1, 0);
 					glBegin(GL_LINE_LOOP);
 						glVertex2fv(&b.min[0]);
 						glVertex2f (b.max.x, b.min.y);
 						glVertex2fv(&b.max[0]);
 						glVertex2f (b.min.x, b.max.y);
+					glEnd();
+					glColor3f(1, 1, 1);
+					glBegin(GL_LINE_LOOP);
+						glVertex2fv(&CamBounds().min[0]);
+						glVertex2f (CamBounds().max.x, CamBounds().min.y);
+						glVertex2fv(&CamBounds().max[0]);
+						glVertex2f (CamBounds().min.x, CamBounds().max.y);
 					glEnd();
 					glBegin(GL_POINTS);
 						glColor3f(1, 0, 0);
@@ -249,7 +226,7 @@ public:
 				}
 
 				glLineWidth(3);
-				mLevel.debugDraw(viewArea);
+				mLevel.debugDraw(CamBounds());
 			}
 
 			glfwSwapBuffers(mWindow);
@@ -269,7 +246,7 @@ void viewportChangedCallback(GLFWwindow* win, int w, int h) {
 	glViewport(0, 0, w, h);
 	game->mWidth  = w;
 	game->mHeight = h;
-	game->mAspect = h / (float)w;
+	CamAspect(h / (float)w);
 }
 
 void onCursorUpdate() {
