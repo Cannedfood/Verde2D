@@ -21,8 +21,8 @@ class Level {
 public:
 	~Level();
 
-	void addObject(Object* o, int type = 0);
-	void addOwned(std::unique_ptr<Object>&& o, int type = 0);
+	Object* addObject(Object* o, int type = 0);
+	Object* addOwned(std::unique_ptr<Object>&& o, int type = 0);
 	void removeObject(Object* o);
 
 	/// Draws the outlines of all boxes, the color depends on the kind of box

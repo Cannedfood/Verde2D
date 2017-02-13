@@ -8,20 +8,88 @@
 
 #include <GL/gl.h>
 
-void Editor::bind(Level* level) {
-	puts("bind");
-	if(mLevel) {
-		printf("\t");
-		unbind();
+/* Insert code
+glm::vec2 p = game->MouseInLevel();
+if(game->mEditor.snap) {
+	glm::vec2 pp = glm::round(p * game->mEditor.snap_dist) / game->mEditor.snap_dist;
+	glm::vec2 size = p - pp;
+	size.x = size.x < 0 ? -1.f : 1.f;
+	size.y = size.y < 0 ? -1.f : 1.f;
+
+	game->AddGround({
+		pp,
+		pp + size / game->mEditor.snap_dist
+	});
+}
+else {
+	glm::vec2 size { 0.05f };
+	game->AddGround({p - size, p + size});
+}
+*/
+
+/* Save code
+// TODO: select file
+std::string save_path = "res/level.yml";
+
+YAML::Emitter savedata;
+
+savedata << YAML::BeginMap;
+
+savedata << YAML::Key << "player";
+game->mPlayer.write(savedata);
+
+savedata << YAML::Key << "objects";
+savedata << YAML::BeginSeq;
+for(size_t i = 0; i < game->mObjects.size(); i++) {
+	savedata << YAML::Value;
+	game->mObjects[i]->write(savedata);
+}
+savedata << YAML::EndSeq;
+
+savedata << YAML::EndMap;
+
+std::ofstream file(save_path);
+if(file)
+	file << savedata.c_str();
+else
+	printf("Failed writing save to %s: Failed opening file.\n", save_path.c_str());
+*/
+
+/* Load code
+auto begin = high_resolution_clock::now();
+
+std::ifstream file("res/level.yml", std::ios::binary);
+if(!file) break;
+
+YAML::Node data = YAML::Load(file);
+if(YAML::Node n = data["player"])
+	game->mPlayer.read(n);
+
+if(YAML::Node objects = data["objects"]) {
+	game->mObjects.clear();
+
+	for(YAML::Node nn : objects) {
+		game->mObjects.emplace_back(new Object);
+		game->mObjects.back()->read(nn);
+		game->mLevel.addObject(game->mObjects.back().get());
 	}
+}
+
+auto end = high_resolution_clock::now();
+printf("Loading level took %fms\n", duration_cast<microseconds>(end - begin).count() * 0.001f);
+*/
+
+void Editor::bind(Level* level) {
+	if(mLevel) unbind();
+
 	mLevel = level;
-	objectMode();
+
+	objectMode(); // Setup key bindings for object mode
 
 	last_error = std::chrono::high_resolution_clock::now();
 }
 
 void Editor::unbind() {
-	puts("unbind");
 	mLevel    = nullptr;
 	mSelected = nullptr;
 	mHandles.clear();
@@ -132,7 +200,6 @@ void Editor::selectUnder(const glm::vec2& p) {
 	if(o.empty()) {
 		mSelected = nullptr;
 		editorError("No object under cursor!");
-		printf("\tcursor = {%f, %f}", p.x, p.y);
 		return;
 	}
 

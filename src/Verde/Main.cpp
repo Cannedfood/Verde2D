@@ -10,6 +10,7 @@
 #include <cstdlib>
 
 #include "Level.hpp"
+#include "Chunk.hpp"
 #include "Object.hpp"
 #include "graphics/Graphics.hpp"
 #include "graphics/Camera.hpp"
@@ -38,30 +39,7 @@ public:
 
 	Level       mLevel;
 
-	Editor*     pEditor;
-
-	struct {
-		bool  active    = false;
-		bool  snap      = true;
-		float snap_dist = 2.f;
-		Object* selected = nullptr;
-	} mEditor;
-
-	glm::vec2 MouseInLevel() {
-		return ViewportToWorld(mMouse);
-	}
-
-	void AddGround(const Box& bounds) {
-		mObjects.emplace_back(new Object);
-		mObjects.back()->mRelativeBounds = bounds;
-		mObjects.back()->mPosition = glm::vec2{0};
-		mLevel.addObject(mObjects.back().get(), Object::STATIC);
-		mObjects.back()->setGraphics(
-			"res/rock.png"
-		);
-		mObjects.back()->mGraphics->setWrapping(glm::vec2{1.f});
-		mEditor.selected = mObjects.back().get();
-	}
+	std::unique_ptr<Editor> mEditor;
 
 	void Init() {
 		glfwInit();
@@ -88,7 +66,7 @@ public:
 			exit(-1);
 		}
 		glfwMakeContextCurrent(mWindow);
-		
+
 		if(YAML::Node n = GetSettings()["graphics"]["vsync"])
 			glfwSwapInterval(n.as<bool>() ? 1 : 0);
 		else {
@@ -104,7 +82,7 @@ public:
 		Graphics::InitCache();
 		AudioData::InitCache();
 
-		pEditor = new Editor;
+		mEditor.reset(new Editor);
 
 		// Test objects
 		mPlayer.mRelativeBounds = {
@@ -115,20 +93,27 @@ public:
 		mLevel.addObject(&mPlayer, Object::DYNAMIC);
 		mLevel.alias(&mPlayer, "player");
 
-		AddGround({
-			{ 0,  0 },
-			{ 10, 1 }
-		});
+		{
+			std::unique_ptr<Object> ground(new Object);
+			ground->mRelativeBounds = {
+				glm::vec2 { -2, 0.f },
+				glm::vec2 {  2, 0.5f }
+			};
+
+			auto* o = mLevel.addOwned(std::move(ground), Object::STATIC);
+			mLevel.alias(o, "default_platform"); // For removal
+			o->setGraphics("res/ground.yml");
+		}
 
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-		mHandles | OnKey(GLFW_KEY_TAB, [this] { if(pEditor) pEditor->bind(&mLevel); });
+		mHandles | OnKey(GLFW_KEY_TAB, [this] { if(mEditor) mEditor->bind(&mLevel); });
 	}
 
 	void Quit() {
-		if(pEditor)
-			delete pEditor;
+		if(mEditor)
+			mEditor.reset();
 
 		mHandles.clear();
 
@@ -203,37 +188,14 @@ public:
 			glLineWidth(4);
 			mLevel.update(dt);
 
+			if(mEditor)
+				mEditor->update(dt);
+
 			glLineWidth(1);
 			mLevel.draw(CamBounds());
 
-			if(pEditor) {
-				pEditor->draw();
-			}
-
-			/*
-			if(mEditor.active) {
-				glDisable(GL_TEXTURE_2D);
-
-				if(mEditor.selected) {
-					glLineWidth(5);
-					Box& b = mEditor.selected->mBounds;
-					glColor3f(1, 1, 0);
-					glBegin(GL_LINE_LOOP);
-						glVertex2fv(&b.min[0]);
-						glVertex2f (b.max.x, b.min.y);
-						glVertex2fv(&b.max[0]);
-						glVertex2f (b.min.x, b.max.y);
-					glEnd();
-					glBegin(GL_POINTS);
-						glColor3f(1, 0, 0);
-						glVertex2fv(&mEditor.selected->mPosition[0]);
-					glEnd();
-				}
-
-				glLineWidth(3);
-				mLevel.debugDraw(CamBounds());
-			}
-			*/
+			if(mEditor)
+				mEditor->draw();
 
 			glfwSwapBuffers(mWindow);
 
@@ -247,99 +209,6 @@ public:
 		Quit();
 	}
 } *game;
-
-void clickCallback(GLFWwindow* win, int btn, int action, int mods) {
-	if(action < 1) return;
-	switch (btn) {
-		case GLFW_MOUSE_BUTTON_RIGHT: {
-			if(Object* o = game->mLevel.at(game->MouseInLevel(), Object::STATIC | Object::DYNAMIC | Object::PARTICLE))
-				game->mEditor.selected = o;
-		} break;
-		case GLFW_MOUSE_BUTTON_MIDDLE: {
-			glm::vec2 p = game->MouseInLevel();
-			if(game->mEditor.snap) {
-				glm::vec2 pp = glm::round(p * game->mEditor.snap_dist) / game->mEditor.snap_dist;
-				glm::vec2 size = p - pp;
-				size.x = size.x < 0 ? -1.f : 1.f;
-				size.y = size.y < 0 ? -1.f : 1.f;
-
-				game->AddGround({
-					pp,
-					pp + size / game->mEditor.snap_dist
-				});
-			}
-			else {
-				glm::vec2 size { 0.05f };
-				game->AddGround({p - size, p + size});
-			}
-		} break;
-		default: break;
-	}
-}
-
-void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
-	if(action > 0) {
-		switch (key) {
-			case GLFW_KEY_K:
-				game->mEditor.snap = !game->mEditor.snap;
-				break;
-			case GLFW_KEY_S: {
-				if(mods & GLFW_MOD_CONTROL) {
-					// TODO: select file
-					std::string save_path = "res/level.yml";
-
-					YAML::Emitter savedata;
-
-					savedata << YAML::BeginMap;
-
-					savedata << YAML::Key << "player";
-					game->mPlayer.write(savedata);
-
-					savedata << YAML::Key << "objects";
-					savedata << YAML::BeginSeq;
-					for(size_t i = 0; i < game->mObjects.size(); i++) {
-						savedata << YAML::Value;
-						game->mObjects[i]->write(savedata);
-					}
-					savedata << YAML::EndSeq;
-
-					savedata << YAML::EndMap;
-
-					std::ofstream file(save_path);
-					if(file)
-						file << savedata.c_str();
-					else
-						printf("Failed writing save to %s: Failed opening file.\n", save_path.c_str());
-				}
-			} break;
-			case GLFW_KEY_O: {
-				auto begin = high_resolution_clock::now();
-
-				std::ifstream file("res/level.yml", std::ios::binary);
-				if(!file) break;
-
-				YAML::Node data = YAML::Load(file);
-				if(YAML::Node n = data["player"])
-					game->mPlayer.read(n);
-
-				if(YAML::Node objects = data["objects"]) {
-					game->mObjects.clear();
-
-					for(YAML::Node nn : objects) {
-						game->mObjects.emplace_back(new Object);
-						game->mObjects.back()->read(nn);
-						game->mLevel.addObject(game->mObjects.back().get());
-					}
-				}
-
-				auto end = high_resolution_clock::now();
-				printf("Loading level took %fms\n", duration_cast<microseconds>(end - begin).count() * 0.001f);
-			} break;
-			case GLFW_KEY_UP:   if(game->mEditor.selected) game->mEditor.selected->mHeight += 0.1f; break;
-			case GLFW_KEY_DOWN: if(game->mEditor.selected) game->mEditor.selected->mHeight -= 0.1f; break;
-		}
-	}
-}
 
 int main(int argc, char** argv) {
 	const std::string settings_path = "res/settings.yml";

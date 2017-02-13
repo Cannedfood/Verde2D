@@ -83,7 +83,7 @@ void Level::__freeId(uint32_t id) {
 	mObjectIds.erase(id);
 }
 
-void Level::addObject(Object* o, int type) {
+Object* Level::addObject(Object* o, int type) {
 	switch(type) {
 		case Object::DYNAMIC:  mDynamicObjects.push_back(o);  o->mType = Object::DYNAMIC; break;
 		case Object::STATIC:   mStaticObjects.push_back(o);   o->mType = Object::STATIC; break;
@@ -95,11 +95,12 @@ void Level::addObject(Object* o, int type) {
 	o->_onAttach();
 
 	//printf("Added object %p\n", o);
+	return o;
 }
 
-void Level::addOwned(std::unique_ptr<Object>&& o, int type) {
+Object* Level::addOwned(std::unique_ptr<Object>&& o, int type) {
 	o->mFlags |= Object::F_OWNED_BY_LEVEL;
-	addObject(o.release(), type);
+	return addObject(o.release(), type);
 }
 
 void Level::removeObject(Object *o) {
