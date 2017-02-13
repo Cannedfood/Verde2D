@@ -58,7 +58,7 @@ std::shared_ptr<AudioData> AudioData::Open(const char *cpath, AudioData::OpenTyp
 
 		if(!result) {
 			result = OpenNotCached(cpath, type);
-			if(result)
+			if(result && result->flags() & F_CACHABLE)
 				pAudioCache->emplace_hint(iter, path, result);
 		}
 

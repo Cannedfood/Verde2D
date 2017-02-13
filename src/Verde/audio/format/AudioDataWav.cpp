@@ -103,7 +103,7 @@ void AudioDataWavStatic::update(unsigned source) {
 	// Nothing to do
 }
 int AudioDataWavStatic::flags() {
-	return F_STATIC;
+	return F_STATIC | F_CACHABLE;
 }
 
 
