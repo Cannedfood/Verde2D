@@ -254,8 +254,12 @@ Object* Level::at(const glm::vec2& p, int types) {
 	return nullptr;
 }
 
-bool Level::at(const glm::vec2& p, std::vector<Object*>& to, size_t n, int types) {
-	size_t left = n;
+bool Level::at(const glm::vec2& p, int types, std::vector<Object*>& to, int n) {
+	size_t left;
+	if(n < 0)
+		left = 10000;
+	else
+		left = (size_t)n;
 
 	if(types & Object::STATIC) {
 		for(Object* o : mStaticObjects) {

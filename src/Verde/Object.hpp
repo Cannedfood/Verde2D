@@ -63,4 +63,7 @@ public:
 
 	uint32_t getId();
 	void alias(const std::string& alias);
+
+	// Centers the position into the bounds
+	void center();
 };

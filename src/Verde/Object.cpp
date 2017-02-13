@@ -121,3 +121,9 @@ uint32_t Object::getId() {
 void Object::alias(const std::string &alias) {
 	mLevel->alias(this, alias);
 }
+
+void Object::center() {
+	glm::vec2 offset = (mRelativeBounds.size() * -.5f) - mRelativeBounds.min;
+
+	mRelativeBounds = mRelativeBounds.offset(offset);
+}

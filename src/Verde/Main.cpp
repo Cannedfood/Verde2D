@@ -18,23 +18,15 @@
 
 #include "audio/Audio.hpp"
 
+#include "editor/Editor.hpp"
+
 using namespace std;
 using namespace std::chrono;
 using namespace std::literals::chrono_literals;
 
-void cursorCallback(GLFWwindow* win, double x, double y);
-void clickCallback(GLFWwindow* win, int btn, int action, int mods);
-void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
-void dropCallback(GLFWwindow* w, int count, const char** data);
-
-class Editor {
-	std::vector<handle> mHandles;
-
-	void toggle();
-};
-
 class Game {
 public:
+	EvtHandles  mHandles;
 	glm::vec2   mMouse;
 
 	GLFWwindow* mWindow;
@@ -45,6 +37,8 @@ public:
 	std::vector<std::unique_ptr<Object>> mObjects;
 
 	Level       mLevel;
+
+	Editor*     pEditor;
 
 	struct {
 		bool  active    = false;
@@ -94,12 +88,7 @@ public:
 			exit(-1);
 		}
 		glfwMakeContextCurrent(mWindow);
-		internal::InitEvents(mWindow);
-		glfwSetCursorPosCallback(mWindow, cursorCallback);
-		glfwSetMouseButtonCallback(mWindow, clickCallback);
-		glfwSetKeyCallback(mWindow, keyCallback);
-		glfwSetDropCallback(mWindow, dropCallback);
-
+		
 		if(YAML::Node n = GetSettings()["graphics"]["vsync"])
 			glfwSwapInterval(n.as<bool>() ? 1 : 0);
 		else {
@@ -109,9 +98,13 @@ public:
 
 		internal::SetViewport(glm::vec2{width, height});
 
+		internal::InitEvents(mWindow);
+		internal::InitAudio();
+
 		Graphics::InitCache();
 		AudioData::InitCache();
 
+		pEditor = new Editor;
 
 		// Test objects
 		mPlayer.mRelativeBounds = {
@@ -130,15 +123,21 @@ public:
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-		internal::InitAudio();
+		mHandles | OnKey(GLFW_KEY_TAB, [this] { if(pEditor) pEditor->bind(&mLevel); });
 	}
 
 	void Quit() {
+		if(pEditor)
+			delete pEditor;
+
+		mHandles.clear();
+
 		internal::FreeAudio();
 
 		Graphics::FreeCache();
 		AudioData::FreeCache();
 		glfwDestroyWindow(mWindow);
+		internal::FreeEvents();
 		glfwTerminate();
 	}
 
@@ -207,6 +206,11 @@ public:
 			glLineWidth(1);
 			mLevel.draw(CamBounds());
 
+			if(pEditor) {
+				pEditor->draw();
+			}
+
+			/*
 			if(mEditor.active) {
 				glDisable(GL_TEXTURE_2D);
 
@@ -220,13 +224,6 @@ public:
 						glVertex2fv(&b.max[0]);
 						glVertex2f (b.min.x, b.max.y);
 					glEnd();
-					glColor3f(1, 1, 1);
-					glBegin(GL_LINE_LOOP);
-						glVertex2fv(&CamBounds().min[0]);
-						glVertex2f (CamBounds().max.x, CamBounds().min.y);
-						glVertex2fv(&CamBounds().max[0]);
-						glVertex2f (CamBounds().min.x, CamBounds().max.y);
-					glEnd();
 					glBegin(GL_POINTS);
 						glColor3f(1, 0, 0);
 						glVertex2fv(&mEditor.selected->mPosition[0]);
@@ -236,6 +233,7 @@ public:
 				glLineWidth(3);
 				mLevel.debugDraw(CamBounds());
 			}
+			*/
 
 			glfwSwapBuffers(mWindow);
 
@@ -249,40 +247,6 @@ public:
 		Quit();
 	}
 } *game;
-
-void onCursorUpdate() {
-	if(
-		glfwGetMouseButton(game->mWindow, GLFW_MOUSE_BUTTON_LEFT) ||
-		glfwGetMouseButton(game->mWindow, GLFW_MOUSE_BUTTON_MIDDLE) ||
-		glfwGetMouseButton(game->mWindow, GLFW_MOUSE_BUTTON_RIGHT)
-	) {
-		if(game->mEditor.selected) {
-			glm::vec2 mouse = game->MouseInLevel();
-			Box&      b     = game->mEditor.selected->mRelativeBounds;
-
-			glm::vec2 mdist = mouse - game->mEditor.selected->mBounds.middle();
-
-			if(game->mEditor.snap)
-				mouse = glm::round(mouse * game->mEditor.snap_dist) / game->mEditor.snap_dist;
-
-			mouse -= game->mEditor.selected->mPosition;
-
-			if(mdist.x < 0) b.min.x = mouse.x;
-			else            b.max.x = mouse.x;
-
-			if(mdist.y < 0) b.min.y = mouse.y;
-			else            b.max.y = mouse.y;
-
-			b.fix();
-		}
-	}
-}
-
-void cursorCallback(GLFWwindow* win, double x, double y) {
-	const glm::vec2& v = internal::GetViewport();
-	game->mMouse = glm::vec2(((float)x / v.x) * 2 - 1, - (((float)y / v.y) * 2 - 1)) ;
-	onCursorUpdate();
-}
 
 void clickCallback(GLFWwindow* win, int btn, int action, int mods) {
 	if(action < 1) return;
@@ -313,66 +277,9 @@ void clickCallback(GLFWwindow* win, int btn, int action, int mods) {
 	}
 }
 
-void dropCallback(GLFWwindow* w, int count, const char** data) {
-	if(count > 0 && game->mEditor.selected)
-		game->mEditor.selected->setGraphics(data[count - 1]);
-}
-
-void setTexture(int i) {
-	if(game->mEditor.selected) {
-		i -= 1;
-
-		struct TexInfo {
-			std::string path;
-			bool wraps;
-			glm::vec2 wrapping;
-		};
-
-		TexInfo textures[] = {
-			{ "res/rock.png", true, { 1, 1 } },
-			{ "res/darkrock.png", true, { 1, 1 } },
-			{ "res/ground.png", true, { 1, 1 } }
-		};
-
-		game->mEditor.selected->setGraphics(textures[i].path);
-		if(textures[i].wraps && game->mEditor.selected->mGraphics)
-			game->mEditor.selected->mGraphics->setWrapping(textures[i].wrapping);
-	}
-}
-
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
 	if(action > 0) {
 		switch (key) {
-			case GLFW_KEY_X:
-				if(game->mEditor.selected) {
-					for (size_t i = 0; i < game->mObjects.size(); i++) {
-						if(game->mObjects[i].get() == game->mEditor.selected) {
-							game->mObjects.erase(game->mObjects.begin() + i);
-							break;
-						}
-					}
-					game->mEditor.selected = nullptr;
-				}
-				break;
-			case GLFW_KEY_TAB:
-					game->mEditor.active = !game->mEditor.active;
-				break;
-			case GLFW_KEY_ESCAPE:
-					game->mEditor.selected = nullptr;
-				break;
-			case GLFW_KEY_1: setTexture(1); putchar('\a'); break;
-			case GLFW_KEY_2: setTexture(2); break;
-			case GLFW_KEY_3: setTexture(3); break;
-			case GLFW_KEY_M:
-				if(YAML::Node audio = GetSettings()["audio"]) {
-					if(YAML::Node bgm = audio["bgm"]) {
-						PlayBgm(bgm.as<std::string>("").c_str(), 2, false);
-					}
-				}
-				break;
-			case GLFW_KEY_P:
-					PlaySfx("res/prefab/HoverCam/hover.wav", glm::vec2(0), 1, 1);
-				break;
 			case GLFW_KEY_K:
 				game->mEditor.snap = !game->mEditor.snap;
 				break;

@@ -14,7 +14,7 @@ class Chunk {
 	std::vector<std::unique_ptr<Object>> mObjects;
 public:
 	bool remove(Object* o);
-	void add(std::unique_ptr<Object>&& o);
+	void add   (std::unique_ptr<Object>&& o);
 
 	void read (YAML::Node n);
 	void write(YAML::Emitter& e);

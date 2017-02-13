@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <deque>
 #include <glm/vec2.hpp>
 #include <GLFW/glfw3.h>
 
@@ -18,15 +19,60 @@ namespace internal {
 	void FreeEvents();
 };
 
-using handle = std::unique_ptr<internal::HandleInterface, internal::HandleInterface::FakeDeleter>;
+using EvtHandle = std::unique_ptr<internal::HandleInterface, internal::HandleInterface::FakeDeleter>;
 
-using KeyFn   = bool(int action);
-using ClickFn = bool(const glm::vec2& v, int action);
-using DragFn  = bool(const glm::vec2& v, const glm::vec2& dif);
-using MoveFn  = bool(const glm::vec2& v, const glm::vec2& dif);
+class EvtHandles {
+	std::deque<EvtHandle> mHandles;
+
+public:
+	EvtHandles& operator|(EvtHandle&& h) {
+		mHandles.emplace_back(std::move(h));
+		return *this;
+	}
+
+	void clear() {
+		mHandles.clear();
+	}
+};
+
+using KeyFn   = bool(int action, int mods);
+using ClickFn = bool(const glm::vec2& pos, int action, int mods);
+using MoveFn  = bool(const glm::vec2& new_pos, const glm::vec2& dif_to_last);
 using DropFn  = bool(const char* c);
 
-handle HookKey   (int key, const std::function<KeyFn>& fn);
-handle HookClick (int key, const std::function<ClickFn>& fn);
-handle HookDrag  (int key, const std::function<DragFn>& fn);
-handle HookMove  (const std::function<MoveFn>& fn);
+EvtHandle HookKey  (int key, const std::function<KeyFn>& fn);
+EvtHandle HookClick(int key, const std::function<ClickFn>& fn);
+EvtHandle HookMove (const std::function<MoveFn>& fn);
+EvtHandle HookDrag (int key, const std::function<MoveFn>& fn);
+
+EvtHandle OnDrop(const std::function<DropFn>&);
+
+// Simplifications
+
+template<typename C>
+EvtHandle OnKey(int key, const C& c, int req_mods = 0) {
+	return HookKey(key, std::function<KeyFn>([c, req_mods](int action, int mods) {
+		if(action > 0 && (mods == 0 || req_mods == mods)) {
+			c();
+			return true;
+		}
+		else
+			return false;
+	}));
+}
+
+template<typename C>
+EvtHandle OnClick(int key, const C& c, int req_mods = 0) {
+	return HookClick(key, [c, req_mods] (auto& pos, int action, int mods) {
+		if(action > 0 && (mods == 0 || req_mods == mods)) {
+			c(pos);
+			return true;
+		}
+		else
+			return false;
+	});
+}
+
+
+glm::vec2 CursorWorld();
+glm::vec2 CursorViewport();

@@ -32,7 +32,7 @@ public:
 	void update(float dt);
 
 	Object* at(const glm::vec2& p, int types);
-	bool    at(const glm::vec2& p, std::vector<Object*>& to, size_t n, int types);
+	bool    at(const glm::vec2& p, int types, std::vector<Object*>& to, int n = -1);
 
 	bool hitTest    (const Box& b);
 	bool hitTestArea(const Box& b, Box* to);
