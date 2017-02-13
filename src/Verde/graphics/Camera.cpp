@@ -6,43 +6,43 @@ extern "C" {
 #	include <stdio.h>
 }
 
+#include <GL/gl.h>
+
 static Box       camBounds;
 static glm::vec2 camPosition;
-static float     camZoom = 0.1f;
+static float     camZoom = 10;
 static float     camTransform[16];
 static float     camAspectRatio = 1;
+static glm::vec2 camViewport;
 
-void UpdateCam() {
-	/*
-	printf(
-		"Camera:\n"
-		"  pos:  %.2f, %.2f\n"
-		"  zoom: %.2f\n"
-		"  aspect: %.3f\n",
-		camPosition.x, camPosition.y,
-		camZoom,
-		camAspectRatio
-	);
-	*/
+namespace internal {
+	void UpdateCam() {
+		glm::vec2 size = glm::vec2(camAspectRatio, 1) * camZoom;
+		camBounds = {
+			camPosition - size * .5f,
+			camPosition + size * .5f
+		};
 
-	glm::vec2 size = glm::vec2(1, camAspectRatio) / camZoom;
-	camBounds = {
-		camPosition - size,
-		camPosition + size
-	};
+		memset(camTransform, 0, sizeof(camTransform)); // integer(0) == float(0)
+		camTransform[0 + 0 * 4] = 2 / size.x;
+		camTransform[1 + 1 * 4] = 2 / size.y;
+		camTransform[0 + 3 * 4] = -((camBounds.max.x + camBounds.min.x)/size.x);
+		camTransform[1 + 3 * 4] = -((camBounds.max.y + camBounds.min.y)/size.y);
+		camTransform[3 + 3 * 4] = 1;
+	}
 
-	float xscale = 2 * camZoom * camAspectRatio;
-	float yscale = 2 * camZoom;
+	void SetViewport(const glm::vec2& v) {
+		camAspectRatio = v.x / v.y;
+		glViewport(0, 0, v.x, v.y);
+		camViewport = v;
+	}
 
-	float projection_mat[] = {
-		xscale, 0, 0, 0,
-		0, yscale, 0, 0,
-		0, 0, 1, 0,
-		-camPosition.x * xscale, -camPosition.y * yscale, 0, 1
-	};
+	const glm::vec2& GetViewport() {
+		return camViewport;
+	}
 
-	memcpy(camTransform, projection_mat, sizeof(camTransform));
-}
+} /// internal
+
 
 const Box&       CamBounds() {
 	return camBounds;

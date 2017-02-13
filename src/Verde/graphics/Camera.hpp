@@ -4,7 +4,12 @@
 
 #include <glm/vec2.hpp>
 
-void UpdateCam();
+namespace internal {
+	void             UpdateCam();
+	void             SetViewport(const glm::vec2& v);
+	const glm::vec2& GetViewport();
+}
+
 
 const Box&       CamBounds();
 const glm::vec2& CamPosition();

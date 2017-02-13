@@ -14,6 +14,7 @@
 #include "graphics/Graphics.hpp"
 #include "graphics/Camera.hpp"
 #include "Settings.hpp"
+#include "Event.hpp"
 
 #include "audio/Audio.hpp"
 
@@ -21,19 +22,22 @@ using namespace std;
 using namespace std::chrono;
 using namespace std::literals::chrono_literals;
 
-void viewportChangedCallback(GLFWwindow* win, int w, int h);
 void cursorCallback(GLFWwindow* win, double x, double y);
 void clickCallback(GLFWwindow* win, int btn, int action, int mods);
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
 void dropCallback(GLFWwindow* w, int count, const char** data);
+
+class Editor {
+	std::vector<handle> mHandles;
+
+	void toggle();
+};
 
 class Game {
 public:
 	glm::vec2   mMouse;
 
 	GLFWwindow* mWindow;
-
-	unsigned    mWidth, mHeight;
 
 	Object      mPlayer;
 	glm::vec2   mPlayerSpeed = { 6.f, 6.f };
@@ -90,7 +94,7 @@ public:
 			exit(-1);
 		}
 		glfwMakeContextCurrent(mWindow);
-		glfwSetWindowSizeCallback(mWindow, viewportChangedCallback);
+		internal::InitEvents(mWindow);
 		glfwSetCursorPosCallback(mWindow, cursorCallback);
 		glfwSetMouseButtonCallback(mWindow, clickCallback);
 		glfwSetKeyCallback(mWindow, keyCallback);
@@ -103,7 +107,7 @@ public:
 			glfwSwapInterval(1);
 		}
 
-		viewportChangedCallback(mWindow, width, height);
+		internal::SetViewport(glm::vec2{width, height});
 
 		Graphics::InitCache();
 		AudioData::InitCache();
@@ -160,7 +164,7 @@ public:
 
 			glfwPollEvents();
 			// Camera
-			UpdateCam();
+			internal::UpdateCam();
 			glMatrixMode(GL_PROJECTION);
 			glLoadMatrixf(CamTransform());
 
@@ -246,13 +250,6 @@ public:
 	}
 } *game;
 
-void viewportChangedCallback(GLFWwindow* win, int w, int h) {
-	glViewport(0, 0, w, h);
-	game->mWidth  = w;
-	game->mHeight = h;
-	CamAspect(h / (float)w);
-}
-
 void onCursorUpdate() {
 	if(
 		glfwGetMouseButton(game->mWindow, GLFW_MOUSE_BUTTON_LEFT) ||
@@ -282,7 +279,8 @@ void onCursorUpdate() {
 }
 
 void cursorCallback(GLFWwindow* win, double x, double y) {
-	game->mMouse = glm::vec2(((float)x / game->mWidth) * 2 - 1, - (((float)y / game->mHeight) * 2 - 1)) ;
+	const glm::vec2& v = internal::GetViewport();
+	game->mMouse = glm::vec2(((float)x / v.x) * 2 - 1, - (((float)y / v.y) * 2 - 1)) ;
 	onCursorUpdate();
 }
 
@@ -433,7 +431,6 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 			case GLFW_KEY_UP:   if(game->mEditor.selected) game->mEditor.selected->mHeight += 0.1f; break;
 			case GLFW_KEY_DOWN: if(game->mEditor.selected) game->mEditor.selected->mHeight -= 0.1f; break;
 		}
-
 	}
 }
 
