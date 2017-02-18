@@ -288,8 +288,36 @@ bool Editor::onDrop(const char *c) {
 	return false;
 }
 
-void Editor::load() {
+#include <fstream>
 
+void Editor::load() {
+	using namespace std::chrono;
+	auto begin = high_resolution_clock::now();
+
+	std::ifstream file("res/level.yml", std::ios::binary);
+	if(!file) return;
+
+	YAML::Node data = YAML::Load(file);
+	if(YAML::Node n = data["player"]) {
+		Object* player = mLevel->get("player");
+		if(!player) {
+			return; // TODO: generate new player
+		}
+		player->read(n);
+	}
+
+	if(YAML::Node objects = data["objects"]) {
+		mLevel->clear();
+
+		for(YAML::Node nn : objects) {
+			std::unique_ptr<Object> o(new Object);
+			o->read(nn);
+			mLevel->addOwned(std::move(o));
+		}
+	}
+
+	auto end = high_resolution_clock::now();
+	printf("Loading level took %fms\n", duration_cast<microseconds>(end - begin).count() * 0.001f);
 }
 
 void Editor::save() {

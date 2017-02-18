@@ -49,6 +49,10 @@ Level::~Level() {
 	for(auto* o : mParticleObjects) o->_onRemove();
 }
 
+void Level::clear() {
+	
+}
+
 void Level::alias(Object *o, const std::string &alias) {
 	mObjectAlias.emplace(alias, o->getId());
 }

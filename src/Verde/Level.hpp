@@ -21,6 +21,8 @@ class Level {
 public:
 	~Level();
 
+	void clear();
+
 	Object* addObject(Object* o, int type = 0);
 	Object* addOwned(std::unique_ptr<Object>&& o, int type = 0);
 	void removeObject(Object* o);
