@@ -132,6 +132,7 @@ void Editor::objectMode() {
 	| OnKey(GLFW_KEY_G, [this]() {
 		mDrawGrid = !mDrawGrid;
 	})
+	| OnKey(GLFW_KEY_C, [this]() { mSelected->center(); })
 	// Mouse controls
 	| OnClick(GLFW_MOUSE_BUTTON_MIDDLE, [this] (auto& a) { selectUnder(a); })
 	| HookDrag(GLFW_MOUSE_BUTTON_MIDDLE,  [this](auto& a, auto& b) { return dragMove(a, b); })
