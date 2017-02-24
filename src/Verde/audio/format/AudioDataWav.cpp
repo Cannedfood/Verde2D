@@ -96,8 +96,11 @@ void AudioDataWavStatic::stop(unsigned source) {
 	alSourceStop(source);
 	alSourcei(source, AL_BUFFER, 0);
 }
-void AudioDataWavStatic::pause(unsigned source) {
-	alSourcePause(source);
+void AudioDataWavStatic::pause(unsigned source, bool b) {
+	if(b)
+		alSourcePause(source);
+	else
+		alSourcePlay(source);
 }
 void AudioDataWavStatic::update(unsigned source) {
 	// Nothing to do
@@ -170,8 +173,11 @@ void AudioDataWavStreamed::stop(unsigned source) {
 	unsigned tmp_buffers[4];
 	alSourceUnqueueBuffers(source, nQueuedBuffers, tmp_buffers);
 }
-void AudioDataWavStreamed::pause(unsigned source) {
-	alSourcePause(source);
+void AudioDataWavStreamed::pause(unsigned source, bool b) {
+	if(b)
+		alSourcePause(source);
+	else
+		alSourcePlay(source);
 }
 void AudioDataWavStreamed::update(unsigned source) {
 	int processed;

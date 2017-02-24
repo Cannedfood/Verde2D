@@ -52,7 +52,7 @@ EvtHandle OnDrop(const std::function<DropFn>&);
 template<typename C>
 EvtHandle OnKey(int key, const C& c, int req_mods = 0) {
 	return HookKey(key, std::function<KeyFn>([c, req_mods](int action, int mods) {
-		if(action > 0 && (mods == 0 || req_mods == mods)) {
+		if(action > 0 && (mods == 0 || (req_mods & mods) == req_mods)) {
 			c();
 			return true;
 		}

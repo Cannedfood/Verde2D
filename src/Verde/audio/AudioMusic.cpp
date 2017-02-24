@@ -115,14 +115,11 @@ void AudioMusic::update(float dt) {
 
 void AudioMusic::pause(bool b) {
 	mPaused = b;
-	// TODO: implement a proper way to unpause AudioData
-	/*
 	auto lock = genlock(mMutex);
 	if(mFromData)
-		mFromData->pause(mFromSource);
+		mFromData->pause(mFromSource, b);
 	if(mToData)
-		mToData->pause(mToSource);
-	*/
+		mToData->pause(mToSource, b);
 }
 
 void AudioMusic::play(

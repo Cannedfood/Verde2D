@@ -38,6 +38,7 @@ public:
 	std::vector<std::unique_ptr<Object>> mObjects;
 
 	Level       mLevel;
+	Chunk       mRootChunk;
 
 	std::unique_ptr<Editor> mEditor;
 
@@ -82,6 +83,7 @@ public:
 		Graphics::InitCache();
 		AudioData::InitCache();
 
+		mRootChunk.init(&mLevel);
 		mEditor.reset(new Editor);
 
 		// Test objects
@@ -100,7 +102,7 @@ public:
 				glm::vec2 {  2, 0.5f }
 			};
 
-			auto* o = mLevel.addOwned(std::move(ground), Object::STATIC);
+			auto* o = mRootChunk.add(std::move(ground), Object::STATIC);
 			mLevel.alias(o, "default_platform"); // For removal
 			o->setGraphics("res/ground.yml");
 		}
@@ -108,7 +110,7 @@ public:
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-		mHandles | OnKey(GLFW_KEY_TAB, [this] { if(mEditor) mEditor->bind(&mLevel); });
+		mHandles | OnKey(GLFW_KEY_TAB, [this] { if(mEditor) mEditor->bind(&mLevel, &mRootChunk); });
 	}
 
 	void Quit() {
@@ -129,24 +131,17 @@ public:
 	void Run() {
 		Init();
 
-		microseconds last = duration_cast<microseconds>(steady_clock::now().time_since_epoch());
 		size_t frames = 0;
 		float  accum_time = 0;
 		float print_timer = 0;
 
+		float dt;
+
 		while(!glfwWindowShouldClose(mWindow)) {
-			float dt;
-			{
-				microseconds now = duration_cast<microseconds>(steady_clock::now().time_since_epoch());
-				dt = (float)((now - last).count() * 0.000001);
-				last = now;
-
-				print_timer += dt;
-				accum_time  += dt;
-				frames++;
-			}
-
 			glfwPollEvents();
+
+			auto beg = steady_clock::now();
+
 			// Camera
 			internal::UpdateCam();
 			glMatrixMode(GL_PROJECTION);
@@ -204,6 +199,13 @@ public:
 				float avg_dt = accum_time / frames;
 				printf("dt (secs): %.2f (%.1fFPS)\n", avg_dt, 1 / avg_dt);
 			}
+
+			auto end = steady_clock::now();
+
+			dt = duration_cast<microseconds>(end - beg).count() * 0.000001f;
+			print_timer += dt;
+			accum_time  += dt;
+			frames++;
 		}
 
 		Quit();

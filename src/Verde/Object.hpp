@@ -58,8 +58,8 @@ public:
 	void _onRemove();
 	void _onAttach();
 
-	void write(YAML::Emitter& to);
-	void read(YAML::Node& from);
+	void save(YAML::Emitter& to);
+	void load(YAML::Node& from);
 
 	uint32_t getId();
 	void alias(const std::string& alias);

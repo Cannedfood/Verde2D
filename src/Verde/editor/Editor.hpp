@@ -14,13 +14,15 @@ class Editor {
 	Chunk*     mChunk    = nullptr;
 	Object*    mSelected = nullptr;
 
+	std::string mChunkPath;
+
 	bool  mSnap         = true;
 	float mSnapDistance = .5f;
 	bool  mDrawGrid     = false;
 
 	std::chrono::high_resolution_clock::time_point last_error;
 public:
-	void bind(Level* level);
+	void bind(Level* level, Chunk* chunk);
 	void unbind();
 
 	void chunkMode();
@@ -28,7 +30,6 @@ public:
 
 	void update(float dt);
 	void draw();
-
 
 	void eraseCurrent();
 

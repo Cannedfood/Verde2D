@@ -82,4 +82,13 @@ struct Box {
 	bool valid() {
 		return max.x >= min.x && max.y >= min.y;
 	}
+
+	/* Returns a Box with min at {inf, inf} and max at {-inf, -inf} for use with expand() */
+	static Box ExpandNull() {
+		return Box{ glm::vec2(1/0.f), glm::vec2(-1/0.f) };
+	}
+
+	static Box Null() {
+		return Box{ glm::vec2(0), glm::vec2(0) };
+	}
 };

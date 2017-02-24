@@ -33,7 +33,7 @@ void Object::_onAttach() {
 	if(mBehavior) mBehavior->start(this);
 }
 
-void Object::write(YAML::Emitter& e) {
+void Object::save(YAML::Emitter& e) {
 	e << YAML::BeginMap;
 
 	e << YAML::Key << "type" << YAML::Value << (int) mType;
@@ -79,7 +79,7 @@ void Object::write(YAML::Emitter& e) {
 	e << YAML::EndMap;
 }
 
-void Object::read(YAML::Node& n) {
+void Object::load(YAML::Node& n) {
 	mType = (Object::Type) n["type"].as<int>();
 
 	if(YAML::Node nn = n["motion"]) {

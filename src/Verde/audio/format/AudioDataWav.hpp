@@ -17,7 +17,7 @@ public:
 
 	void start(unsigned source) override;
 	void stop(unsigned source) override;
-	void pause(unsigned source) override;
+	void pause(unsigned source, bool b) override;
 
 	void update(unsigned source) override;
 
@@ -43,7 +43,7 @@ public:
 
 	void start(unsigned source) override;
 	void stop(unsigned source) override;
-	void pause(unsigned source) override;
+	void pause(unsigned source, bool b) override;
 
 	void update(unsigned source) override;
 

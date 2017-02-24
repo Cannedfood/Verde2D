@@ -1,10 +1,12 @@
 #include "Editor.hpp"
 
 #include "../Level.hpp"
+#include "../Chunk.hpp"
 #include "../Object.hpp"
 #include "../graphics/Camera.hpp"
 #include "../audio/Audio.hpp"
 #include "../Settings.hpp"
+#include "Dialogue.hpp"
 
 #include <GL/gl.h>
 
@@ -79,10 +81,11 @@ auto end = high_resolution_clock::now();
 printf("Loading level took %fms\n", duration_cast<microseconds>(end - begin).count() * 0.001f);
 */
 
-void Editor::bind(Level* level) {
+void Editor::bind(Level* level, Chunk* chunk) {
 	if(mLevel) unbind();
 
 	mLevel = level;
+	mChunk = chunk;
 
 	objectMode(); // Setup key bindings for object mode
 
@@ -91,6 +94,7 @@ void Editor::bind(Level* level) {
 
 void Editor::unbind() {
 	mLevel    = nullptr;
+	mChunk    = nullptr;
 	mSelected = nullptr;
 	mHandles.clear();
 }
@@ -110,6 +114,13 @@ void Editor::objectMode() {
 
 	| OnKey(GLFW_KEY_L, [this]() { load(); }, GLFW_MOD_CONTROL)
 	| OnKey(GLFW_KEY_S, [this]() { save(); }, GLFW_MOD_CONTROL)
+	| OnKey(GLFW_KEY_O, [this]() {
+		std::string path = FileDialogue("Select a chunk file", "./res/settings.yml");
+		if(!path.empty()) {
+			mChunkPath = path;
+			load();
+		}
+	}, GLFW_MOD_CONTROL)
 
 	| OnKey(GLFW_KEY_T, [this]() { selectUnder(CursorWorld()); })
 	| OnKey(GLFW_KEY_R, [this]() {
@@ -291,33 +302,20 @@ bool Editor::onDrop(const char *c) {
 #include <fstream>
 
 void Editor::load() {
-	using namespace std::chrono;
-	auto begin = high_resolution_clock::now();
+	if(YAML::Node n = YAML::LoadFile("res/level.yml")) {
+		mSelected = nullptr;
 
-	std::ifstream file("res/level.yml", std::ios::binary);
-	if(!file) return;
+		using namespace std::chrono;
+		auto begin = high_resolution_clock::now();
 
-	YAML::Node data = YAML::Load(file);
-	if(YAML::Node n = data["player"]) {
-		Object* player = mLevel->get("player");
-		if(!player) {
-			return; // TODO: generate new player
-		}
-		player->read(n);
+		mChunk->clear();
+		mChunk->load(n);
+
+		auto end = high_resolution_clock::now();
+		printf("Loading level took %fms\n", duration_cast<microseconds>(end - begin).count() * 0.001f);
 	}
-
-	if(YAML::Node objects = data["objects"]) {
-		mLevel->clear();
-
-		for(YAML::Node nn : objects) {
-			std::unique_ptr<Object> o(new Object);
-			o->read(nn);
-			mLevel->addOwned(std::move(o));
-		}
-	}
-
-	auto end = high_resolution_clock::now();
-	printf("Loading level took %fms\n", duration_cast<microseconds>(end - begin).count() * 0.001f);
+	else
+		editorError("Failed loading file");
 }
 
 void Editor::save() {

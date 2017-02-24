@@ -1,4 +1,44 @@
 #!/bin/bash
 
-rm -r obj bin doxy
-rm Makefile *.make
+if test $1 && [ $1 == "-h" ]; then
+	echo
+	echo "Removes all temporary files from the project"
+	echo "  Usage: $0"
+	echo "  (has to be run from the git repositories root folder)"
+	echo
+	exit
+fi
+
+echo "==== Clean ===="
+
+function remove () {
+	local found=false
+	for i in ${@:2}
+	do
+		if [ -e "$i" ]; then
+			found=true
+			break
+		fi
+	done
+
+	if $found; then
+		echo "$1"
+		for i in ${@:2}
+		do
+			if [ -e "$i" ]; then
+				rm -R "$i"
+			fi
+		done
+	fi
+}
+
+remove "Removing bin" "bin"
+remove "Removing obj" "obj"
+
+remove "Removing Makefiles" "./*.make" "./Makefile"
+remove "Removing Ninja files" "*.ninja" ".ninja_deps" ".ninja_log"
+remove "Removing Visual Studio files" ".vs" "*.sln" "*.vcxproj" "*.filters" "*.user"
+remove "Removing Codelite files" "*.project" "*.workspace" ".codelite" ".clang" ".build*" "*.mk"
+remove "Removing projects folder" "projects"
+remove "Removing modules folders (They won't need to be redownloaded)" modules
+remove "Removing other..." "*.trace" "*.out" "*.txt"

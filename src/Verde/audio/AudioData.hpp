@@ -15,7 +15,7 @@ public:
 	const std::string& sourceName() { return mSourceName; }
 
 	virtual void start(unsigned source) = 0;
-	virtual void pause(unsigned source) = 0;
+	virtual void pause(unsigned source, bool b) = 0;
 	virtual void stop(unsigned source) = 0;
 
 	virtual void update(unsigned source) = 0;
