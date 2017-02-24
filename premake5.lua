@@ -1,3 +1,8 @@
+newoption {
+	trigger = "static-deps",
+	description = "compile into binary"
+}
+
 workspace "Verde"
 	language "C++" flags "C++14"
 
@@ -65,7 +70,7 @@ if os.isdir "src/glm" then
 end
 defines "GLM_ENABLE_EXPERIMENTAL"
 
-if not os.findlib(libs.yamlcpp) then
+if _OPTIONS["static-deps"] or not os.findlib(libs.yamlcpp) then
 
 project(libs.yamlcpp)
 	kind "StaticLib"
@@ -76,9 +81,9 @@ project(libs.yamlcpp)
 
 end
 
-if not os.findlib(libs.lua) then
+if _OPTIONS["static-deps"] or not os.findlib(libs.lua) then
 
-project(libs.lua)
+project(libs.lua) language "C"
 	kind "StaticLib"
 	files {
 		"src/lua/**.c",
@@ -88,6 +93,12 @@ project(libs.lua)
 	removefiles {
 		"src/lua/lua.c", -- Lua cli interpreter
 		"src/lua/luac.c" -- Lua cli compiler
+	}
+
+	optimize "Speed"
+	symbols "Off"
+	flags {
+		"NoFramePointer"
 	}
 end
 

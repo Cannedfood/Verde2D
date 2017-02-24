@@ -1,4 +1,4 @@
 #!/bin/bash
 
-time premake5 gmake
+time premake5 $@ gmake
 time make -j9

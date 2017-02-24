@@ -42,9 +42,7 @@ public:
 
 	std::unique_ptr<Editor> mEditor;
 
-	void Init() {
-		glfwInit();
-
+	void OpenWindow() {
 		int width = 800, height = 600;
 
 		if(YAML::Node n = GetSettings()["graphics"]["resolution"]) {
@@ -76,6 +74,12 @@ public:
 		}
 
 		internal::SetViewport(glm::vec2{width, height});
+	}
+
+	void Init() {
+		glfwInit();
+
+		OpenWindow();
 
 		internal::InitEvents(mWindow);
 		internal::InitAudio();

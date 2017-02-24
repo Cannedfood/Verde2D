@@ -3,6 +3,8 @@
 #include "graphics/Texture.hpp"
 #include "Level.hpp"
 
+#include <algorithm>
+
 void Chunk::init(Level* l) {
 	mLevel = l;
 }
