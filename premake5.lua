@@ -8,14 +8,29 @@ workspace "Verde"
 
 	configurations { "Debug", "Release" }
 
+	architecture "x86_64"
+
+	floatingpoint "Fast"
+	vectorextensions "SSE2"
+
 	filter "configurations:Debug"
 		optimize "Debug"
 		symbols "On"
 	filter "configurations:Release"
 		optimize "Speed"
+		flags {
+			"NoFramePointer",
+			"NoRuntimeChecks"
+		}
 	filter "*"
 
 	startproject "verde"
+
+	local function precompiled_lib(name)
+		if os.is "windows" then
+			return path.join("win/lib/%{cfg.architecture}/%{cfg.shortname}/", name)
+		end
+	end
 
 -- Library stuff
 
@@ -49,7 +64,7 @@ end
 
 if not os.findlib(libs.glfw) then
 	if os.is "windows" then
-		libs.glfw = "win/lib/%{cfg.shortname}/glfw3.lib"
+		libs.glfw = precompiled_lib "glfw3.lib"
 		includedirs "win/include"
 	else
 		error "Couldn't find glfw. You seem to be on a unix system: install it."
@@ -58,7 +73,7 @@ end
 
 if not os.findlib(libs.openal) then
 	if os.is "windows" then
-		libs.openal = "win/lib/%{cfg.shortname}/OpenAL32.lib"
+		libs.openal = precompiled_lib "OpenAL32.lib"
 		includedirs "win/include"
 	else
 		error "Couldn't find openal. You seem to be on a unix system: install it."
@@ -70,7 +85,11 @@ if os.isdir "src/glm" then
 end
 defines "GLM_ENABLE_EXPERIMENTAL"
 
+group "dependencies"
+
 if _OPTIONS["static-deps"] or not os.findlib(libs.yamlcpp) then
+
+libs.yamlcpp = "yamlcpp_static"
 
 project(libs.yamlcpp)
 	kind "StaticLib"
@@ -82,6 +101,8 @@ project(libs.yamlcpp)
 end
 
 if _OPTIONS["static-deps"] or not os.findlib(libs.lua) then
+
+libs.lua = "lua_static"
 
 project(libs.lua) language "C"
 	kind "StaticLib"
@@ -100,8 +121,14 @@ project(libs.lua) language "C"
 	flags {
 		"NoFramePointer"
 	}
+
+	if os.is "linux" then
+		defines "LUA_USE_LINUX"
+	end
 end
 
+
+group ""
 
 project "verde"
 	kind "WindowedApp"
