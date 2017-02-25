@@ -1,14 +1,14 @@
 graphics:
-  force_resolution: false
-  fullscreen: false
   vsync: false
+  fullscreen: false
+  force_resolution: false
   samples: 0
   resolution:
     - 1280
     - 720
 audio:
   sources_ambient: 1
-  sources_dialogue: 1
-  sources_sfx: 2
   sources_entity: 3
+  sources_sfx: 2
+  sources_dialogue: 1
   bgm: /home/benno/Downloads/Nycto - Aqua Nova.wav

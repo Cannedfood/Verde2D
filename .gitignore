@@ -10,4 +10,6 @@ Makefile
 *.vcxproj
 *.sln
 
+res/settings.yml
+
 TODO.md
