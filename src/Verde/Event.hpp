@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <deque>
+#include <functional>
 #include <glm/vec2.hpp>
 #include <GLFW/glfw3.h>
 

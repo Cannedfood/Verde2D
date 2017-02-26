@@ -139,7 +139,7 @@ public:
 		float  accum_time = 0;
 		float print_timer = 0;
 
-		float dt;
+		float dt = 0;
 
 		while(!glfwWindowShouldClose(mWindow)) {
 			glfwPollEvents();

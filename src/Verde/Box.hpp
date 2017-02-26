@@ -85,7 +85,7 @@ struct Box {
 
 	/* Returns a Box with min at {inf, inf} and max at {-inf, -inf} for use with expand() */
 	static Box ExpandNull() {
-		return Box{ glm::vec2(1/0.f), glm::vec2(-1/0.f) };
+		return Box{ glm::vec2(INFINITY), glm::vec2(-INFINITY) };
 	}
 
 	static Box Null() {

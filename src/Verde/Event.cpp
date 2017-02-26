@@ -2,6 +2,7 @@
 
 #include <list>
 #include <map>
+#include <functional>
 
 #include "graphics/Camera.hpp"
 

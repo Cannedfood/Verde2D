@@ -6,6 +6,10 @@ extern "C" {
 #	include <stdio.h>
 }
 
+#ifdef _WIN32
+#	include <Windows.h> // Dependency of include <GL/gl.h>
+#endif
+
 #include <GL/gl.h>
 
 static Box       camBounds;
@@ -33,7 +37,7 @@ namespace internal {
 
 	void SetViewport(const glm::vec2& v) {
 		camAspectRatio = v.x / v.y;
-		glViewport(0, 0, v.x, v.y);
+		glViewport(0, 0, (GLsizei)v.x, (GLsizei)v.y);
 		camViewport = v;
 	}
 
@@ -71,7 +75,6 @@ float* CamTransform() {
 	return camTransform;
 }
 
-#include <GL/gl.h>
 glm::vec2 ViewportToWorld(const glm::vec2& v) {
 	return (v - glm::vec2(camTransform[12], camTransform[13])) / glm::vec2(camTransform[0], camTransform[5]);
 }

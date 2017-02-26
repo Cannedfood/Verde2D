@@ -4,18 +4,32 @@ newoption {
 }
 
 workspace "Verde"
+
+ -----------------------------
+--- General option defaults ---
+ -----------------------------
 	language "C++" flags "C++14"
-
-	configurations { "Debug", "Release" }
-
-	architecture "x86_64"
 
 	floatingpoint "Fast"
 	vectorextensions "SSE2"
 
+	startproject "verde"
+
+
+ --------------------
+--- Configurations ---
+ --------------------
+
+	configurations { "Debug", "Release" }
+	platforms      { "32", "64" }
+
+	filter "platforms:64" architecture "x86_64"
+	filter "platforms:32" architecture "x86"
+
 	filter "configurations:Debug"
 		optimize "Debug"
 		symbols "On"
+
 	filter "configurations:Release"
 		optimize "Speed"
 		flags {
@@ -24,15 +38,16 @@ workspace "Verde"
 		}
 	filter "*"
 
-	startproject "verde"
+ -----------------
+-- Library stuff --
+ -----------------
 
-	local function precompiled_lib(name)
-		if os.is "windows" then
-			return path.join("win/lib/%{cfg.architecture}/%{cfg.shortname}/", name)
-		end
+local function precompiled_lib(name)
+	if os.is "windows" then
+		return path.join("win/lib/%{cfg.shortname}/", name)
 	end
-
--- Library stuff
+	error "No precompiled libs included for this OS"
+end
 
 local libs -- table containing all library names/locations
 
@@ -56,7 +71,7 @@ elseif os.is "windows" then
 	}
 else
 	error(
-		"I haven't written the libraries for your system yet." ..
+		"I haven't written the libraries for your system into premake5.lua yet." ..
 		"Assuming you're on a *nix operating system, " ..
 		"you can mostly copy the settings from linux"
 	)
@@ -85,14 +100,13 @@ if os.isdir "src/glm" then
 end
 defines "GLM_ENABLE_EXPERIMENTAL"
 
-group "dependencies"
-
 if _OPTIONS["static-deps"] or not os.findlib(libs.yamlcpp) then
 
 libs.yamlcpp = "yamlcpp_static"
 
+group "dependencies"
 project(libs.yamlcpp)
-	kind "StaticLib"
+	kind "StaticLib" group "dependencies"
 	files "src/yaml-cpp/src/**"
 
 	project "*"
@@ -104,6 +118,7 @@ if _OPTIONS["static-deps"] or not os.findlib(libs.lua) then
 
 libs.lua = "lua_static"
 
+group "dependencies"
 project(libs.lua) language "C"
 	kind "StaticLib"
 	files {
@@ -113,7 +128,7 @@ project(libs.lua) language "C"
 
 	removefiles {
 		"src/lua/lua.c", -- Lua cli interpreter
-		"src/lua/luac.c" -- Lua cli compiler
+		"src/lua/luac.c" -- Lua compiler
 	}
 
 	optimize "Speed"
@@ -128,10 +143,17 @@ project(libs.lua) language "C"
 end
 
 
-group ""
+ ----------------
+-- Main project --
+ ----------------
 
+group ""
 project "verde"
-	kind "WindowedApp"
+	-- Lying to build system in debug, because cl output is necessary, right VS??
+	filter "configurations:Release" kind "WindowedApp"
+	filter "configurations:Debug"   kind "ConsoleApp"
+	filter "*"
+
 	files "src/Verde/**"
 	links {
 		libs.gl,

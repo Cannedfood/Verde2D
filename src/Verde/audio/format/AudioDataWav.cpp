@@ -51,7 +51,7 @@ namespace AudioDataWav {
 static size_t next_pow2(size_t t) {
 	int shifted = 0;
 	for(shifted = 0; t != 0; t >>= 1, shifted++);
-	return 1 << (shifted - 1);
+	return size_t(1) << (shifted - 1);
 }
 
 AudioDataWavStatic::AudioDataWavStatic() :
@@ -68,7 +68,7 @@ bool AudioDataWavStatic::init(void* p_drwav) {
 	if(!wav) return false;
 
 	unsigned channels, sampleRate;
-	size_t totalSampleCount;
+	dr_uint64 totalSampleCount;
 	void* data = drwav__read_and_close_s16(wav, &channels, &sampleRate, &totalSampleCount);
 
 	if(!mBuffer) alGenBuffers(1, &mBuffer);
@@ -76,7 +76,7 @@ bool AudioDataWavStatic::init(void* p_drwav) {
 	alBufferData(
 		mBuffer,
 		channels == 1 ? AL_FORMAT_MONO16 : AL_FORMAT_STEREO16,
-		data, totalSampleCount, sampleRate
+		data, (ALsizei) totalSampleCount, sampleRate
 	);
 
 	drwav_free(data);
@@ -139,7 +139,7 @@ bool AudioDataWavStreamed::init(void *p_drwav, float forward_buffering_seconds) 
 		return false;
 	}
 
-	mSamplesPerBuffer = next_pow2(forward_buffering_seconds * 0.25f * wav->sampleRate);
+	mSamplesPerBuffer = next_pow2((size_t)(forward_buffering_seconds * 0.25f * wav->sampleRate));
 
 	mBufferData.reset(new short[mSamplesPerBuffer]);
 
@@ -148,7 +148,7 @@ bool AudioDataWavStreamed::init(void *p_drwav, float forward_buffering_seconds) 
 
 	for (size_t i = 0; i < 4; i++) {
 		drwav_read_s16(wav, mSamplesPerBuffer, mBufferData.get());
-		alBufferData(mBuffers[i], mFormat, mBufferData.get(), mSamplesPerBuffer * sizeof(int16_t), wav->sampleRate);
+		alBufferData(mBuffers[i], mFormat, mBufferData.get(), (ALsizei)mSamplesPerBuffer * sizeof(int16_t), wav->sampleRate);
 	}
 
 	return true;
@@ -186,7 +186,7 @@ void AudioDataWavStreamed::update(unsigned source) {
 	// TODO: get all processed buffers at once
 	// TODO: stop or loop at end
 	while(processed--) {
-		size_t read = drwav_read_s16((drwav*) mWav, mSamplesPerBuffer, mBufferData.get());
+		dr_uint64 read = drwav_read_s16((drwav*) mWav, mSamplesPerBuffer, mBufferData.get());
 		if(read == 0) {
 			//puts("Stream EOF!");
 			drwav_seek_to_sample((drwav*) mWav, 0);
@@ -195,7 +195,7 @@ void AudioDataWavStreamed::update(unsigned source) {
 
 		unsigned buffer;
 		alSourceUnqueueBuffers(source, 1, &buffer);
-		alBufferData(buffer, mFormat, mBufferData.get(), read * sizeof(int16_t), ((drwav*) mWav)->sampleRate);
+		alBufferData(buffer, mFormat, mBufferData.get(), (ALsizei)read * sizeof(int16_t), ((drwav*) mWav)->sampleRate);
 		alSourceQueueBuffers(source, 1, &buffer);
 		//puts("Pushed buffer!");
 	}

@@ -17,6 +17,10 @@ static void _checkAl(const char* statement, const char* file, int line, const ch
 	}
 }
 
+#ifdef _WIN32
+#	define __PRETTY_FUNCTION__ __FUNCSIG__
+#endif
+
 #define AL_CHECK(X) do { X; _checkAl(#X, __FILE__, __LINE__, __PRETTY_FUNCTION__); } while(false)
 
 #ifndef AUDIO_NO_DEBUG

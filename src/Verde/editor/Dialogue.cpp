@@ -37,5 +37,5 @@
 		return "";
 	}
 #else // _GNUC_
-#	error "File dialogue not implemented for this system"
+	std::string FileDialogue(const char* title, const char* folder, const char* filter) { return ""; }
 #endif
