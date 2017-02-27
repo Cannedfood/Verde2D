@@ -3,6 +3,11 @@ newoption {
 	description = "compile into binary"
 }
 
+newoption {
+	trigger     = "native",
+	description = "Use optimizations for current processor"
+}
+
 workspace "Verde"
 
  -----------------------------
@@ -20,16 +25,22 @@ workspace "Verde"
 --- Configurations ---
  --------------------
 
-	configurations { "Debug", "Release" }
-	platforms      { "32", "64" }
+	if _OPTIONS.native then
+		if os.is "linux" then
+			buildoptions "-mtune=native"
+		end
+	end
 
-	filter "platforms:64" architecture "x86_64"
-	filter "platforms:32" architecture "x86"
+	configurations { "Debug", "Release" }
+	platforms      { "amd64", "i386" }
+
+
+	filter "platforms:amd64" architecture "x86_64"
+	filter "platforms:i386"  architecture "x86"
 
 	filter "configurations:Debug"
 		optimize "Debug"
 		symbols "On"
-
 	filter "configurations:Release"
 		optimize "Speed"
 		flags {
