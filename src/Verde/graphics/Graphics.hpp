@@ -13,9 +13,13 @@ private:
 public:
 	virtual ~Graphics() {}
 
+	enum WriteFlags {
+		WRITE_NO_PREFAB = 1
+	};
+
 	virtual void draw(const Object* onto) = 0;
-	virtual void write(YAML::Emitter& to) = 0;
-	void writeOrPrefab(YAML::Emitter& to);
+	virtual void writeImpl(YAML::Emitter& to, int flags = 0) = 0;
+	void         write(YAML::Emitter& to, int flags = 0);
 
 
 	virtual void setAnimationOffset(float sec) {}

@@ -65,7 +65,7 @@ bool StaticGraphics::load(YAML::Node n) {
 	}
 }
 
-void StaticGraphics::write(YAML::Emitter& e) {
+void StaticGraphics::writeImpl(YAML::Emitter& e, int flags) {
 	e << YAML::BeginMap;
 
 	e << YAML::Key << "type" << "default";

@@ -12,13 +12,21 @@ class Editor {
 	EvtHandles mHandles;
 	Level*     mLevel    = nullptr;
 	Chunk*     mChunk    = nullptr;
+
 	Object*    mSelected = nullptr;
+	Chunk*     mCurChunk = nullptr;
 
 	std::string mChunkPath;
 
 	bool  mSnap         = true;
 	float mSnapDistance = .5f;
 	bool  mDrawGrid     = false;
+
+	enum Mode {
+		MODE_NONE,
+		EDIT_CHUNKS,
+		EDIT_OBJECTS
+	} mMode;
 
 	std::chrono::high_resolution_clock::time_point last_error;
 public:

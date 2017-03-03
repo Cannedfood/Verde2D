@@ -5,6 +5,19 @@ player:
   graphics:
     type: default
     texture: res/sprite-l.png
+
+chunks:
+  - objects:
+      - type: 4
+        motion: [-0.4368743, 1.484787]
+        position: [-5.187737, 2.1829]
+        bounds: [-1, -1, 1, 1]
+        graphics: res/prefab/HoverCam/HoverCamAnim.yml
+        audio:
+          file: res/prefab/HoverCam/hover.wav
+          loop: true
+        behavior:
+          type: hovercam-follow
 objects:
   - type: 1
     bounds: [0, 0.5, 10, 1]

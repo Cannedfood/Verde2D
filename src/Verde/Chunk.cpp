@@ -84,39 +84,57 @@ bool Chunk::empty() {
 
 	return true;
 }
+Box Chunk::bounds(bool recursive) {
+	Box b = Box::ExpandNull();
+	
+	for(auto& o : mObjects)
+		b.expand(o->mBounds);
 
+	if(recursive) {
+		for(auto& c : mChunks)
+			b.expand(c->bounds());
+	}
+
+	return b;
+}
 
 using namespace YAML;
 
 void Chunk::load(YAML::Node n) {
-	// TODO: fix loading
-	glm::vec2 offset_total;
+	if(Node nn = n["file"]) {
+		mFile = nn.as<std::string>();
+		Node loaded = LoadFile(mFile);
+
+		this->load(loaded);
+	}
+	else {
+		if(Node nn = n["chunks"]) {
+			mChunks.clear();
+			for(Node data : nn) {
+				auto* c = createChunk();
+				c->load(data);
+			}
+		}
+
+		if(Node nn = n["objects"]) {
+			mObjects.clear();
+			for(Node o : nn) {
+				mObjects.emplace_back(new Object);
+				mObjects.back()->load(o);
+				mObjects.back()->mPosition += mOffset;
+				mLevel->addObject(mObjects.back().get());
+			}
+		}
+	}
 
 	if(Node nn = n["offset"]) {
-		offset_total.x = nn[0].as<float>();
-		offset_total.y = nn[1].as<float>();
-	}
-
-	if(Node nn = n["file"]) {
-		Node loaded = LoadFile(nn.as<std::string>());
-
-	}
-
-	if(Node nn = n["objects"]) {
-		mObjects.clear();
-		for(Node o : nn) {
-			mObjects.emplace_back(new Object);
-			mObjects.back()->load(o);
-			mObjects.back()->mPosition += mOffset;
-			mLevel->addObject(mObjects.back().get());
-		}
+		offset({
+			nn[0].as<float>(),
+			nn[1].as<float>()
+		});
 	}
 }
 void Chunk::save(YAML::Emitter& e) {
-	glm::vec2 old_offset = mOffset;
-
-	offset(-mOffset);
-
 	e << BeginMap;
 
 	if(mOffset.x != 0 || mOffset.y != 0) {
@@ -125,14 +143,21 @@ void Chunk::save(YAML::Emitter& e) {
 		e << EndSeq;
 	}
 
+	glm::vec2 old_offset = mOffset;
+	offset(-mOffset);
+
 	if(!mObjects.empty()) {
 		e << Key << "objects" << BeginSeq;
 		for(auto& a : mObjects)
 			a->save(e);
 		e << EndSeq;
+		e << Key << "chunks" << BeginSeq;
+		for(auto& a : mChunks)
+			a->save(e);
+		e << EndSeq;
 	}
 
-	e << EndMap;
+	offset(old_offset); // Reset offset
 
-	offset(old_offset);
+	e << EndMap;
 }

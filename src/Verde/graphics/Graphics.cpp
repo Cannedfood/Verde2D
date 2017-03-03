@@ -7,8 +7,8 @@
 #include <cstring>
 #include <fstream>
 
-void Graphics::writeOrPrefab(YAML::Emitter &to) {
-	if(mPrefab.size() != 0)
+void Graphics::write(YAML::Emitter &to, int flags) {
+	if(mPrefab.size() != 0 && (flags & WRITE_NO_PREFAB))
 		to << mPrefab;
 	else
 		write(to);

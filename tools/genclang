@@ -1,4 +1,4 @@
 #!/bin/bash
 
 time premake5 $@ --cc=clang gmake
-time make -j9
+time make -j${nproc}

@@ -96,15 +96,45 @@ void Editor::unbind() {
 	mLevel    = nullptr;
 	mChunk    = nullptr;
 	mSelected = nullptr;
+	mCurChunk = nullptr;
 	mHandles.clear();
 }
 
 void Editor::chunkMode() {
+	mMode = EDIT_CHUNKS;
+	mHandles.clear();
 
+	if(mSelected)
+		mCurChunk = mSelected->mChunk;
+	if(!mCurChunk) // If couldn't get any other chunk
+		mCurChunk = mChunk;
+
+	// Edit chunk file with enter
+	// Hirarchy up with q ??
+	mHandles
+	| OnKey(GLFW_KEY_TAB, [this]() { unbind(); })
+
+	| OnKey(GLFW_KEY_ENTER, [this]() {
+		// TODO: edit file or give error
+		if(mCurChunk) {
+
+		}
+		else editorError("No chunk selected");
+	})
+
+	| OnKey(GLFW_KEY_S, [this]() {
+		// TODO: Save mCurChunk, or open editor if it is not from a seperate file.
+	}, GLFW_MOD_CONTROL)
+
+	| OnKey(GLFW_KEY_O, [this]() {
+		// TODO: Save mCurChunk, or open editor if it is not from a seperate file.
+	}, GLFW_MOD_CONTROL);
 }
 
 void Editor::objectMode() {
 	mHandles.clear();
+	mMode = EDIT_OBJECTS;
+
 	mHandles
 	// Basic controls
 	| OnKey(GLFW_KEY_TAB, [this]() { unbind(); })
@@ -132,10 +162,15 @@ void Editor::objectMode() {
 	| OnKey(GLFW_KEY_G, [this]() {
 		mDrawGrid = !mDrawGrid;
 	})
-	| OnKey(GLFW_KEY_C, [this]() { mSelected->center(); })
+	| OnKey(GLFW_KEY_C, [this]() {
+		if(mSelected)
+			mSelected->center();
+		else
+			editorError("Nothing selected!");
+	})
 	// Mouse controls
-	| OnClick(GLFW_MOUSE_BUTTON_MIDDLE, [this] (auto& a) { selectUnder(a); })
-	| HookDrag(GLFW_MOUSE_BUTTON_MIDDLE,  [this](auto& a, auto& b) { return dragMove(a, b); })
+	| OnClick(GLFW_MOUSE_BUTTON_MIDDLE, [this](auto& a) { selectUnder(a); })
+	| HookDrag(GLFW_MOUSE_BUTTON_MIDDLE,[this](auto& a, auto& b) { return dragMove(a, b); })
 	| HookDrag(GLFW_MOUSE_BUTTON_LEFT,  [this](auto& a, auto& b) { return dragMove(a, b); })
 	| HookDrag(GLFW_MOUSE_BUTTON_RIGHT, [this](auto& a, auto& b) { return dragResize(a, b); })
 	// On drop
@@ -154,7 +189,7 @@ void Editor::objectMode() {
 }
 
 void Editor::update(float dt) {
-	if(!mLevel) { return; }
+	if(!mLevel) return;
 }
 
 void Editor::draw() {
@@ -182,26 +217,27 @@ void Editor::draw() {
 		glEnd();
 	}
 
+	if(mMode == EDIT_OBJECTS) {
+		glLineWidth(3);
+		mLevel->debugDraw(CamBounds());
 
-	glLineWidth(3);
-	mLevel->debugDraw(CamBounds());
+		if(mSelected) {
+			glLineWidth(5);
+			Box& b = mSelected->mBounds;
+			glColor3f(1, 1, 0);
+			glBegin(GL_LINE_LOOP);
+				glVertex2fv(&b.min[0]);
+				glVertex2f (b.max.x, b.min.y);
+				glVertex2fv(&b.max[0]);
+				glVertex2f (b.min.x, b.max.y);
+			glEnd();
 
-	if(mSelected) {
-		glLineWidth(5);
-		Box& b = mSelected->mBounds;
-		glColor3f(1, 1, 0);
-		glBegin(GL_LINE_LOOP);
-			glVertex2fv(&b.min[0]);
-			glVertex2f (b.max.x, b.min.y);
-			glVertex2fv(&b.max[0]);
-			glVertex2f (b.min.x, b.max.y);
-		glEnd();
-
-		glPointSize(16);
-		glBegin(GL_POINTS);
+			glPointSize(16);
 			glColor3f(1, 0, 0);
-			glVertex2fv(&mSelected->mPosition[0]);
-		glEnd();
+			glBegin(GL_POINTS);
+				glVertex2fv(&mSelected->mPosition[0]);
+			glEnd();
+		}
 	}
 }
 

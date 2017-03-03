@@ -59,7 +59,7 @@ void Object::save(YAML::Emitter& e) {
 
 	if(mGraphics) {
 		e << YAML::Key << "graphics";
-		mGraphics->writeOrPrefab(e);
+		mGraphics->write(e, 0);
 	}
 
 	if(mBehavior) {
@@ -79,7 +79,19 @@ void Object::save(YAML::Emitter& e) {
 	e << YAML::EndMap;
 }
 
-void Object::load(YAML::Node& n) {
+void Object::load(YAML::Node& in_n) {
+	YAML::Node n = in_n;
+
+	if(in_n.IsScalar()) {
+		std::string file = in_n.as<std::string>();
+		try {
+			n = YAML::LoadFile(file);
+		}
+		catch(std::exception& e) {
+			printf("Failed loading %s: %s\n", e.what(), file.c_str());
+		}
+	}
+
 	mType = (Object::Type) n["type"].as<int>();
 
 	if(YAML::Node nn = n["motion"]) {
@@ -125,5 +137,6 @@ void Object::alias(const std::string &alias) {
 void Object::center() {
 	glm::vec2 offset = (mRelativeBounds.size() * -.5f) - mRelativeBounds.min;
 
+	mPosition -= offset;
 	mRelativeBounds = mRelativeBounds.offset(offset);
 }

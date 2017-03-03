@@ -20,16 +20,18 @@ workspace "Verde"
 
 	startproject "verde"
 
-
- --------------------
---- Configurations ---
- --------------------
-
+ ----------------------
+--- Handling options ---
+ ----------------------
 	if _OPTIONS.native then
 		if os.is "linux" then
 			buildoptions "-mtune=native"
 		end
 	end
+
+ --------------------
+--- Configurations ---
+ --------------------
 
 	configurations { "Debug", "Release" }
 	platforms      { "amd64", "i386" }
@@ -174,5 +176,5 @@ project "verde"
 	}
 
 	if not os.is "windows" then
-		links "pthread"
+		links { "pthread" }
 	end

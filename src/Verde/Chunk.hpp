@@ -25,6 +25,8 @@ public:
 
 	inline Level* level() const { return mLevel; }
 
+	std::vector<std::unique_ptr<Chunk>>& getChunks() { return mChunks; }
+
 	std::unique_ptr<Object> remove(Object* o);
 	Object*                 add   (std::unique_ptr<Object>&& o, int type = -1);
 
@@ -33,7 +35,7 @@ public:
 
 	void offset(const glm::vec2& p);
 
-	Box bounds();
+	Box bounds(bool with_subchunks = true);
 
 	void clear();
 	void clean();

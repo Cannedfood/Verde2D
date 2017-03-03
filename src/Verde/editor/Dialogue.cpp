@@ -36,6 +36,13 @@
 
 		return "";
 	}
+
+	int EditDialogue(const char* file) {
+		std::string command = "xdg-open ";
+		command += file;
+		return system(command.c_str());
+	}
 #else // _GNUC_
 	std::string FileDialogue(const char* title, const char* folder, const char* filter) { return ""; }
+	int EditDialogue(const char *file) { return -1; }
 #endif

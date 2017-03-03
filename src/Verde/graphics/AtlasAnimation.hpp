@@ -16,5 +16,5 @@ public:
 	bool load(YAML::Node& n);
 
 	void draw(const Object* onto) override;
-	void write(YAML::Emitter& e) override;
+	void writeImpl(YAML::Emitter& e, int flags) override;
 };

@@ -73,7 +73,7 @@ bool AtlasAnimation::load(YAML::Node& n) {
 	}
 }
 
-void AtlasAnimation::write(YAML::Emitter& e) {
+void AtlasAnimation::writeImpl(YAML::Emitter& e, int flags) {
 	using namespace YAML;
 	e << BeginMap;
 	e << Key << "type"    << "atlas-animation";
